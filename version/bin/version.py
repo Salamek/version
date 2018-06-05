@@ -36,7 +36,7 @@ from version.logging.ColoredFormatter import ColoredFormatter
 
 from docopt import docopt
 
-logging_level = logging.INFO
+logging_level = logging.DEBUG
 console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setLevel(logging_level)
 fmt = '[%(levelname)-18s] $BOLD%(asctime)s.%(msecs).03d %(process)d %(filename)s:$RESET%(lineno)d] %(message)s'
