@@ -411,18 +411,22 @@ class Version(object):
             repo.index.add(modified_files)
 
             repo.index.commit(self.build_commit_message(set_version))
+            self.log.info('{} files has been commited'.format(len(modified_files)))
 
         if self._config['GIT']['AUTO_TAG']:
             repo.create_tag(str(set_version), message=self.build_commit_message(set_version))
+            self.log.info('Tag {} has been created'.format(set_version))
 
         if self._config['GIT']['AUTO_PUSH'] is True:
             repo.remotes.origin.push(str(set_version))
+            self.log.info('Changes and tag has been pushed to origin')
         elif isinstance(self._config['GIT']['AUTO_PUSH'], str):
             origin = getattr(repo.remotes, self._config['GIT']['AUTO_PUSH'])
             if not origin.exists():
                 raise ConfigurationError('Push origin {} not found'.format(self._config['GIT']['AUTO_PUSH']))
 
             origin.push(str(set_version))
+            self.log.info('Changes and tag has been pushed to {}'.format(self._config['GIT']['AUTO_PUSH']))
 
     def status(self) -> None:
         """
