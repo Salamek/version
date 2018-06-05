@@ -92,10 +92,11 @@ To simply advance in version you can use "+" notation in format (+{1-3})({\d+}) 
 * ...
 
 ```bash
-$ version + to advance by 1 patch version
+$ version + #to advance by 1 patch version
 OR
-$ version +10 to advance by 10 patch versions
+$ version +10 #to advance by 10 patch versions
 OR
-$ version ++1 to advance by 1 minor version
+$ version ++1 #to advance by 1 minor version
+```
 
 Thats it!
