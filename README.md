@@ -95,7 +95,7 @@ OR
 $ version mark 1.0.1
 ```
 
-To simply advance in version you can use "+" notation in format (+{1-3})({\d+}) where first group defines version type (number of +) and second version defines step:
+To simply advance in version you can use `"+"` notation in format `(+{1-3})({\d+})` where first group defines version type (number of +) and second version defines step:
 
 * `+` Means advance by one patch version
 * `++` Means advance by one minor version
