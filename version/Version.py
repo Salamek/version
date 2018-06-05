@@ -3,6 +3,7 @@ import yaml
 import re
 import glob
 import logging
+from git import Repo
 from version.exception import ConfigurationError, ProjectVersionError
 from distutils.version import StrictVersion
 
@@ -257,6 +258,9 @@ class Version(object):
 
         return new_version
 
+    def build_commit_message(self, version: StrictVersion) -> str:
+        return self._config['GIT']['COMMIT_MESSAGE'].format(version=version)
+
     def mark(self):
         current_version = self.find_version()
 
@@ -300,7 +304,7 @@ class Version(object):
         if self._config['GIT']['AUTO_PUSH']:
             print('GIT.AUTO_PUSH is ENABLED')
         print('GIT.COMMIT_MESSAGE will be "{}"'.format(
-            self._config['GIT']['COMMIT_MESSAGE'].format(version=set_version)
+            self.build_commit_message(set_version)
         ))
 
         if self._options['--all_yes']:
@@ -313,6 +317,28 @@ class Version(object):
         modified_files = self.mark_version_files(set_version, dry=self._options['--dry'])
         self.log.debug('Modified files: {}'.format(modified_files))
         print('{} files has been modified to contain version string {}'.format(len(modified_files), self._options['<version>']))
+
+        repo = Repo(self._project_dir)
+
+        # first add all modified files
+
+        if self._config['GIT']['AUTO_COMMIT']:
+            for modified_file in modified_files:
+                repo.index.add(modified_file)
+
+            repo.index.commit(self.build_commit_message(set_version))
+
+        if self._config['GIT']['AUTO_TAG']:
+            repo.create_tag(str(set_version), message=self.build_commit_message(set_version))
+
+        if self._config['GIT']['AUTO_PUSH'] is True:
+            repo.remotes.origin.push()
+        elif isinstance(self._config['GIT']['AUTO_PUSH'], str):
+            origin = getattr(repo.remotes, self._config['GIT']['AUTO_PUSH'])
+            if not origin.exists():
+                raise ConfigurationError('Push origin {} not found'.format(self._config['GIT']['AUTO_PUSH']))
+
+            origin.push()
 
     def status(self):
         print('Current version is {}'.format(self.find_version()))
