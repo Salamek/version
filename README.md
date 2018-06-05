@@ -49,7 +49,7 @@ $ pacman -Sy version
 
 # Configuration
 
-Create file named `.version.yml` in root of your project with this content:
+Create file named `.version.yml` in root of your project with this content (Only REGEXPS and VERSION_FILES are required):
 
 ```yml
 
