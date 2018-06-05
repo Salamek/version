@@ -1,5 +1,5 @@
 # Version
-
+Do you know that boring step before pushing new relese ? Yes changing version strings all over the place :-( Well this tool solves that for you!
 Version is simple tool to manage multiple version files in your project and commit/tag/push them to git repository.
 
 # Installation
