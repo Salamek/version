@@ -401,7 +401,7 @@ class Version(object):
                 return
         modified_files = self.mark_version_files(set_version, dry=self._options['--dry'])
         self.log.debug('Modified files: {}'.format(modified_files))
-        print('{} files has been modified to contain version string {}'.format(len(modified_files), set_version))
+        self.log.info('{} files has been modified to contain version string {}'.format(len(modified_files), set_version))
 
         repo = Repo(self._project_dir)
 
