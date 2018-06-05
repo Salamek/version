@@ -49,6 +49,10 @@ LOG.addHandler(console_handler)
 
 
 def main() -> None:
+    """
+    Main entry point
+    :return: 
+    """
     signal.signal(signal.SIGINT, lambda *_: sys.exit(0))  # Properly handle Control+C
     options = docopt(__doc__)
 

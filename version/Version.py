@@ -9,12 +9,19 @@ from distutils.version import StrictVersion
 
 
 class Version(object):
+    """
+    Version class
+    """
     VERSION_CONF_NAME = '.version.yml'
     log = logging.getLogger(__name__)
 
     _regexps = {}
 
     def __init__(self, options):
+        """
+        Constructor
+        :param options: options passed by user 
+        """
         self._options = options
         self._project_dir = self._resolve_project_dir()
         self._config_file = self._resolve_config_file()
@@ -23,12 +30,21 @@ class Version(object):
 
         self.compile_regexps()
 
-    def compile_regexps(self):
+    def compile_regexps(self) -> None:
+        """
+        Precompile regexps
+        :return: 
+        """
         for name, regexp in self._config['REGEXPS'].items():
             self._regexps[name] = re.compile(regexp, re.MULTILINE)
 
     @staticmethod
     def validate_config(config_dict: dict) -> None:
+        """
+        Validate configuration
+        :param config_dict: dict containing configuration
+        :return: 
+        """
         if 'VERSION_FILES' not in config_dict:
             raise ConfigurationError('Required config section VERSION_FILES not found in config')
 
@@ -44,9 +60,17 @@ class Version(object):
                 raise ConfigurationError('Regexp name {} not found for file {}'.format(regexp_name, file))
 
     def get_project_dir(self) -> str:
+        """
+        Return project dir
+        :return: 
+        """
         return self._project_dir
 
     def _resolve_project_dir(self) -> str:
+        """
+        Finds project dir by option in configuration or by passed parameter
+        :return: 
+        """
         if self._options['--project_dir']:
             project_dir = os.path.dirname(os.path.realpath(self._options['--project_dir']))
             if not os.path.isdir(project_dir):
@@ -60,9 +84,17 @@ class Version(object):
         return project_dir
 
     def get_config_file(self) -> str:
+        """
+        Return config file
+        :return: 
+        """
         return self._config_file
 
     def _resolve_config_file(self) -> str:
+        """
+        Find config file in default location (project root) or by passed argument
+        :return: 
+        """
         if self._options['--config_file']:
             config_file = os.path.realpath(self._options['--config_file'])
             if not os.path.isfile(config_file):
@@ -80,10 +112,15 @@ class Version(object):
         return config_file
 
     def get_config(self) -> dict:
+        """
+        Return config
+        :return: 
+        """
         return self._config
 
     def _load_config(self) -> dict:
         """
+        Load config from file into private variable
         :return: 
         """
         with open(self.get_config_file(), 'rb') as config_file_handle:
@@ -98,10 +135,11 @@ class Version(object):
 
             return config
 
-    def find_version_files(self):
-        pass
-
     def find_version(self) -> StrictVersion:
+        """
+        Find project current version and check for mismatch
+        :return: StrictVersion
+        """
         versions = {}
         for path, regexp_name in self._config['VERSION_FILES'].items():
             full_path = os.path.join(self._project_dir, path)
@@ -164,7 +202,13 @@ class Version(object):
 
         return StrictVersion(next(iter(versions.values())))
 
-    def mark_version_files(self, version: StrictVersion, dry: bool=False):
+    def mark_version_files(self, version: StrictVersion, dry: bool=False) -> list:
+        """
+        Mark version files with specified version
+        :param version: version to set
+        :param dry: is dry run ?
+        :return: list
+        """
         processed_files = []
         modified_files = []
         for path, regexp_name in self._config['VERSION_FILES'].items():
@@ -231,6 +275,12 @@ class Version(object):
 
     @staticmethod
     def advance_patch(version: StrictVersion, by: int=1) -> StrictVersion:
+        """
+        Advances patch version number 
+        :param version: version to modify
+        :param by: step to advance
+        :return: StrictVersion
+        """
         new_version = StrictVersion(str(version))
         version_modify = list(new_version.version)
         version_modify[2] = version_modify[2] + by
@@ -239,7 +289,13 @@ class Version(object):
         return new_version
 
     @staticmethod
-    def advance_minor(version: StrictVersion, by: int=1):
+    def advance_minor(version: StrictVersion, by: int=1) -> StrictVersion:
+        """
+        Advances minor version number
+        :param version: version to modify
+        :param by: step to advance
+        :return: StrictVersion
+        """
         new_version = StrictVersion(str(version))
         version_modify = list(new_version.version)
         version_modify[1] = version_modify[1] + by
@@ -249,7 +305,13 @@ class Version(object):
         return new_version
 
     @staticmethod
-    def advance_major(version: StrictVersion, by: int=1):
+    def advance_major(version: StrictVersion, by: int=1) -> StrictVersion:
+        """
+        Advance major version number
+        :param version: version to modify
+        :param by: step to advance
+        :return: StrictVersion
+        """
         new_version = StrictVersion(str(version))
         version_modify = list(new_version.version)
         version_modify[0] = version_modify[0] + by
@@ -259,13 +321,26 @@ class Version(object):
         return new_version
 
     def build_commit_message(self, version: StrictVersion) -> str:
+        """
+        Build commit message
+        :param version: version to put into commit message
+        :return: str
+        """
         return self._config['GIT']['COMMIT_MESSAGE'].format(version=version)
 
     def get_uncommited_modified_files(self) -> list:
+        """
+        Return uncommited modified files
+        :return: list
+        """
         git = Git(self._project_dir)
         return git.ls_files('-m').splitlines()
 
-    def mark(self):
+    def mark(self) -> None:
+        """
+        Mark project version files vit version specified by argument
+        :return: None
+        """
         # Check if we have all files commited
         modified_files = self.get_uncommited_modified_files()
         if len(modified_files):
@@ -349,5 +424,9 @@ class Version(object):
 
             origin.push(str(set_version))
 
-    def status(self):
+    def status(self) -> None:
+        """
+        Print version status
+        :return: 
+        """
         print('Current version is {}'.format(self.find_version()))
