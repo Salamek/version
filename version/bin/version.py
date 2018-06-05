@@ -13,17 +13,18 @@ Command details:
 
 
 Usage:
-    version mark <version> [-p DIR] [-c FILE] [--dry]
+    version mark <version> [-p DIR] [-c FILE] [--dry] [--all_yes]
     version status [-p DIR] [-c FILE]
     version 
-    version <version> [-p DIR] [-c FILE] [--dry]
+    version <version> [-p DIR] [-c FILE] [--dry] [--all_yes]
     version (-h | --help)
     version (-v | --version)
 
 Options:
     --dry                       Run as usually but don't change anything.
     -p DIR --project_dir=DIR    Project directory, if not set current is used.
-    -d --project_dir=DIR    Project directory, if not set current is used.
+    -y --all_yes                Answer YES to all prompts.
+    -d --project_dir=DIR        Project directory, if not set current is used.
     -c FILE --config_file=FILE  Path to config file, if not set --project_dir/version.conf is used
     --version                   Show version.
 """

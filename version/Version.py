@@ -4,7 +4,7 @@ import re
 import glob
 import logging
 from version.exception import ConfigurationError, ProjectVersionError
-from distutils.version import LooseVersion, StrictVersion
+from distutils.version import StrictVersion
 
 
 class Version(object):
@@ -26,10 +26,7 @@ class Version(object):
         if not len(config_dict['VERSION_FILES']):
             raise ConfigurationError('Required config section VERSION_FILES is empty')
 
-
     def get_project_dir(self) -> str:
-        #if not self._project_dir:
-        #    self._project_dir = self._resolve_project_dir()
         return self._project_dir
 
     def _resolve_project_dir(self) -> str:
@@ -46,9 +43,6 @@ class Version(object):
         return project_dir
 
     def get_config_file(self) -> str:
-        #if not self._config_file:
-        #    self._config_file = self._resolve_config_file()
-
         return self._config_file
 
     def _resolve_config_file(self) -> str:
@@ -69,8 +63,6 @@ class Version(object):
         return config_file
 
     def get_config(self) -> dict:
-        #if not self._config:
-        #    self._config = self._resolve_config()
         return self._config
 
     def _load_config(self) -> dict:
@@ -155,8 +147,9 @@ class Version(object):
 
         return StrictVersion(next(iter(versions.values())))
 
-    def mark_version_files(self, version: StrictVersion, dry:bool=False):
-        modified = []
+    def mark_version_files(self, version: StrictVersion, dry: bool=False):
+        processed_files = []
+        modified_files = []
         for path, regexp in self._config['VERSION_FILES'].items():
             full_path = os.path.join(self._project_dir, path)
             version_regexp = re.compile(regexp, re.MULTILINE)
@@ -164,20 +157,60 @@ class Version(object):
             if not glob_result:
                 self.log.warning('No files found for path {}'.format(full_path))
             for found_path in glob_result:
-                with open(found_path) as found_path_handle:
-                    # lets find if it contains regexp
-                    if dry:
-                        if not version_regexp.search(found_path_handle.read()):
-                            self.log.warning('No version match for file {}'.format(found_path))
-                        else:
-                            if found_path not in modified:
+                if found_path not in processed_files:
+                    with open(found_path, 'r') as found_path_handle_read:
+                        # lets find if it contains regexp
+                        if dry:
+                            if not version_regexp.search(found_path_handle_read.read()):
+                                self.log.warning('No version match for file {}'.format(found_path))
+                            else:
                                 self.log.info('DRY RUN: I would modify {} to {}'.format(found_path, version))
-                                modified.append(found_path)
-                    else:
-                        def replace_function(m):
-                            print(m.groups())
-                            return 10, 10, 10
-                        print(version_regexp.sub(replace_function, found_path_handle.read()))
+                            modified_data_to_write = None
+                        else:
+                            def replace_function(m):
+                                full_match = m.group(0)
+                                replaces = []
+                                try:
+                                    # Lets try full version group
+                                    replaces.append([m.group('version'), str(version)])
+                                except IndexError:
+                                    # Lets try parted version match
+                                    replaces.append([m.group('major'), str(version.version[0])])
+                                    replaces.append([m.group('minor'), str(version.version[1])])
+                                    try:
+                                        replaces.append([m.group('patch'), str(version.version[2])])
+                                    except IndexError:
+                                        pass
+
+                                    try:
+                                        if version.prerelease:
+                                            replaces.append([m.group('prerelease'), str(version.prerelease[0])])
+                                            replaces.append([m.group('prerelease_num'), str(version.prerelease[1])])
+                                        else:
+                                            replaces.append([m.group('prerelease'), ''])
+                                            replaces.append([m.group('prerelease_num'), ''])
+                                    except IndexError:
+                                        pass
+
+                                search_after = 0
+                                for needle, replacement in replaces:
+                                    index = full_match.find(needle, search_after)
+                                    if index > -1:
+                                        search_after = index + 1
+                                        keep_part = full_match[:index]
+                                        replace_part = full_match[index:]
+                                        full_match = keep_part + replace_part.replace(needle, replacement, 1)
+
+                                return full_match
+                            modified_data_to_write = version_regexp.sub(replace_function, found_path_handle_read.read())
+                    if modified_data_to_write:
+                        with open(found_path, 'w') as found_path_handle_write:
+                            found_path_handle_write.write(modified_data_to_write)
+                            modified_files.append(found_path)
+                            # Append to processed list to prevent multiple file changes
+                    processed_files.append(found_path)
+
+        return modified_files
 
     @staticmethod
     def advance_patch(version: StrictVersion, by: int=1) -> StrictVersion:
@@ -254,12 +287,16 @@ class Version(object):
             self._config['GIT']['COMMIT_MESSAGE'].format(version=set_version)
         ))
 
-        ok = input('(y/n) [y]') or 'y'
-        if ok.strip() == 'n':
-            print('Maybe next time... BYE!')
-            return
-        self.mark_version_files(set_version, dry=self._options['--dry'])
-        print('MARK {}'.format(self._options['<version>']))
+        if self._options['--all_yes']:
+            self.log.debug('Auto YES')
+        else:
+            ok = input('(y/n) [y]') or 'y'
+            if ok.strip() == 'n':
+                print('Maybe next time... BYE!')
+                return
+        modified_files = self.mark_version_files(set_version, dry=self._options['--dry'])
+        self.log.debug('Modified files: {}'.format(modified_files))
+        print('{} files has been modified to contain version string {}'.format(len(modified_files), self._options['<version>']))
 
     def status(self):
         print('Current version is {}'.format(self.find_version()))
