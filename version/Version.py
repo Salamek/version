@@ -4,6 +4,7 @@ import re
 import glob
 import logging
 from git import Repo, Git
+from git.remote import PushInfo
 from version.exception import ConfigurationError, ProjectVersionError
 from distutils.version import StrictVersion
 
@@ -418,9 +419,8 @@ class Version(object):
             self.log.info('Tag {} has been created'.format(set_version))
 
         if self._config['GIT']['AUTO_PUSH'] is True:
-            result = repo.remotes.origin.push()
-            self.log.debug(result)
-            if len(result):
+            result = repo.remotes.origin.push().pop()
+            if not result.flags & PushInfo.ERROR:
                 self.log.info('Changes has been pushed to origin')
                 repo.remotes.origin.push(str(set_version))
                 self.log.info('Tag has been pushed to origin')
@@ -430,8 +430,7 @@ class Version(object):
                 raise ConfigurationError('Push origin {} not found'.format(self._config['GIT']['AUTO_PUSH']))
 
             result = origin.push()
-            self.log.debug(result)
-            if len(result):
+            if not result.flags & PushInfo.ERROR:
                 self.log.info('Changes has been pushed to {}'.format(self._config['GIT']['AUTO_PUSH']))
                 origin.push(str(set_version))
                 self.log.info('Tag has been pushed to {}'.format(self._config['GIT']['AUTO_PUSH']))
