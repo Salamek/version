@@ -1,0 +1,14 @@
+GIT:
+    AUTO_COMMIT: true
+    AUTO_TAG: true
+    AUTO_PUSH: true
+    COMMIT_MESSAGE: 'New version {version}'
+
+REGEXPS:
+    'python': 'VERSION\s*=\s*\(\s*(?P<major>\d+?)\s*\,\s*(?P<minor>\d+?)\s*\,\s*(?P<patch>\d+?)\s*\)'
+    'PKGBUILD': 'pkgver\s*=\s*(?P<version>.*)'
+
+VERSION_FILES:
+    'version/__init__.py': 'python'
+    'archlinux/PKGBUILD': 'PKGBUILD'
+    '*/__init__.py': 'python'

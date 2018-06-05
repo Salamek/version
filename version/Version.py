@@ -8,7 +8,10 @@ from distutils.version import StrictVersion
 
 
 class Version(object):
-    VERSION_CONF_NAME = '.version.conf.yml'
+    VERSION_CONF_NAME = '.version.yml'
+    log = logging.getLogger(__name__)
+
+    _regexps = {}
 
     def __init__(self, options):
         self._options = options
@@ -16,7 +19,12 @@ class Version(object):
         self._config_file = self._resolve_config_file()
         self._config = self._load_config()
         self.validate_config(self._config)
-        self.log = logging.getLogger(__name__)
+
+        self.compile_regexps()
+
+    def compile_regexps(self):
+        for name, regexp in self._config['REGEXPS'].items():
+            self._regexps[name] = re.compile(regexp, re.MULTILINE)
 
     @staticmethod
     def validate_config(config_dict: dict) -> None:
@@ -25,6 +33,14 @@ class Version(object):
 
         if not len(config_dict['VERSION_FILES']):
             raise ConfigurationError('Required config section VERSION_FILES is empty')
+
+        if not len(config_dict['REGEXPS']):
+            raise ConfigurationError('Required config section REGEXPS is empty')
+
+        # Check if all files have valid regexp names
+        for file, regexp_name in config_dict['VERSION_FILES'].items():
+            if regexp_name not in config_dict['REGEXPS']:
+                raise ConfigurationError('Regexp name {} not found for file {}'.format(regexp_name, file))
 
     def get_project_dir(self) -> str:
         return self._project_dir
@@ -86,9 +102,9 @@ class Version(object):
 
     def find_version(self) -> StrictVersion:
         versions = {}
-        for path, regexp in self._config['VERSION_FILES'].items():
+        for path, regexp_name in self._config['VERSION_FILES'].items():
             full_path = os.path.join(self._project_dir, path)
-            version_regexp = re.compile(regexp, re.MULTILINE)
+            version_regexp = self._regexps[regexp_name]
             glob_result = glob.iglob(full_path, recursive=True)
             if not glob_result:
                 self.log.warning('No files found for path {}'.format(full_path))
@@ -97,7 +113,7 @@ class Version(object):
                     # lets find if it contains regexp
                     version_match = version_regexp.search(found_path_handle.read())
                     if not version_match:
-                        self.log.warning('No version match for file {} with regexp {}'.format(found_path, regexp))
+                        self.log.warning('No version match for file {} with regexp named "{}"'.format(found_path, regexp_name))
                     else:
                         try:
                             # Lets try full version group
@@ -150,9 +166,9 @@ class Version(object):
     def mark_version_files(self, version: StrictVersion, dry: bool=False):
         processed_files = []
         modified_files = []
-        for path, regexp in self._config['VERSION_FILES'].items():
+        for path, regexp_name in self._config['VERSION_FILES'].items():
             full_path = os.path.join(self._project_dir, path)
-            version_regexp = re.compile(regexp, re.MULTILINE)
+            version_regexp = self._regexps[regexp_name]
             glob_result = glob.iglob(full_path, recursive=True)
             if not glob_result:
                 self.log.warning('No files found for path {}'.format(full_path))
