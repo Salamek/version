@@ -418,7 +418,9 @@ class Version(object):
             self.log.info('Tag {} has been created'.format(set_version))
 
         if self._config['GIT']['AUTO_PUSH'] is True:
-            if len(repo.remotes.origin.push()):
+            result = repo.remotes.origin.push()
+            self.log.debug(result)
+            if len(result):
                 self.log.info('Changes has been pushed to origin')
                 repo.remotes.origin.push(str(set_version))
                 self.log.info('Tag has been pushed to origin')
@@ -427,7 +429,9 @@ class Version(object):
             if not origin.exists():
                 raise ConfigurationError('Push origin {} not found'.format(self._config['GIT']['AUTO_PUSH']))
 
-            if len(origin.push()):
+            result = origin.push()
+            self.log.debug(result)
+            if len(result):
                 self.log.info('Changes has been pushed to {}'.format(self._config['GIT']['AUTO_PUSH']))
                 origin.push(str(set_version))
                 self.log.info('Tag has been pushed to {}'.format(self._config['GIT']['AUTO_PUSH']))
