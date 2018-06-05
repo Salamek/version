@@ -2,6 +2,18 @@
 
 Version is simple tool to manage multiple version files in your project and commit/tag/push them to git repository.
 
+# Features
+
+1. Modifies all files containing version string with one simple command
+2. Adds modified version files into GIT commit and pushes them
+3. Can create version tag in GIT
+4. Keeps track if all version files uses same version string
+5. Keeps track if all modified files are commited to GIT
+6. Keeps track if newly set version is not lower of equal to current version
+7. Checks validity of newly set version
+8. Can advance patch/minor/major version by simply using "+" notation (see usage section)
+9. Currently this tool assumes that you are using GIT as your VCS, if do you wish to use this tool without GIT or with different VCS let me know in Issue.
+
 # Installation
 
 ## Debian and derivates
@@ -52,14 +64,16 @@ GIT:
 # key is name of regexp and value is regexp it self
 # add your own and delete unused ones
 REGEXPS:
-    'python': '__version__\s*=\s*\'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)\'' # Regexp for version format commonly used in python
-    'PKGBUILD': 'pkgver\s*=\s*(?P<version>.*)' # Regexp used in PKGBUILD
+    'python': __version__\s*=\s*\'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)\' # Regexp for version format commonly used in python
+    'setup.py': version\s*=\s*\'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)\' # Regexp for version format commonly used in python setup.py
+    'PKGBUILD': pkgver\s*=\s*(?P<version>.*) # Regexp used in PKGBUILD
 
 # Array of version files to find and modify, glob format is supported
 # key is glob path and values is regexp name to use to find version string in found file/s
 # add your own and delete unused ones
 VERSION_FILES:
     'version/__init__.py': 'python'
+    'setup.py': 'setup.py'
     'archlinux/PKGBUILD': 'PKGBUILD'
 ```
 
@@ -97,6 +111,12 @@ OR
 $ version +10 #to advance by 10 patch versions
 OR
 $ version ++1 #to advance by 1 minor version
+```
+
+For more options use
+
+```bash
+$ version --help
 ```
 
 Thats it!
