@@ -418,19 +418,19 @@ class Version(object):
             self.log.info('Tag {} has been created'.format(set_version))
 
         if self._config['GIT']['AUTO_PUSH'] is True:
-            repo.remotes.origin.push()
-            self.log.info('Changes has been pushed to origin')
-            repo.remotes.origin.push(str(set_version))
-            self.log.info('Tag has been pushed to origin')
+            if repo.remotes.origin.push():
+                self.log.info('Changes has been pushed to origin')
+                repo.remotes.origin.push(str(set_version))
+                self.log.info('Tag has been pushed to origin')
         elif isinstance(self._config['GIT']['AUTO_PUSH'], str):
             origin = getattr(repo.remotes, self._config['GIT']['AUTO_PUSH'])
             if not origin.exists():
                 raise ConfigurationError('Push origin {} not found'.format(self._config['GIT']['AUTO_PUSH']))
 
-            origin.push()
-            self.log.info('Changes has been pushed to {}'.format(self._config['GIT']['AUTO_PUSH']))
-            origin.push(str(set_version))
-            self.log.info('Tag has been pushed to {}'.format(self._config['GIT']['AUTO_PUSH']))
+            if origin.push():
+                self.log.info('Changes has been pushed to {}'.format(self._config['GIT']['AUTO_PUSH']))
+                origin.push(str(set_version))
+                self.log.info('Tag has been pushed to {}'.format(self._config['GIT']['AUTO_PUSH']))
 
     def status(self) -> None:
         """
