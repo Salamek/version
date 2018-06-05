@@ -1,21 +1,6 @@
 #!/usr/bin/env python
-import os
-import re
-import sys
 
 from setuptools import setup, find_packages
-
-version = re.compile(r'VERSION\s*=\s*\((.*?)\)')
-
-
-def get_package_version() -> str:
-    base = os.path.abspath(os.path.dirname(__file__))
-    with open(os.path.join(base, "version/__init__.py")) as init_f:
-        for line in init_f:
-            m = version.match(line.strip())
-            if not m:
-                continue
-            return ".".join(m.groups()[0].split(", "))
 
 classes = """
     Development Status :: 4 - Beta
@@ -34,7 +19,7 @@ classifiers = [s.strip() for s in classes.split('\n') if s]
 
 setup(
     name='version',
-    version=get_package_version(),
+    version='1.1.5',
     description='Simple helper python application to set version of project and create tags in git',
     long_description=open('README.md').read(),
     author='Adam Schubert',
