@@ -3,7 +3,7 @@ import yaml
 import re
 import glob
 import logging
-from git import Repo
+from git import Repo, Git
 from version.exception import ConfigurationError, ProjectVersionError
 from distutils.version import StrictVersion
 
@@ -261,7 +261,17 @@ class Version(object):
     def build_commit_message(self, version: StrictVersion) -> str:
         return self._config['GIT']['COMMIT_MESSAGE'].format(version=version)
 
+    def get_uncommited_modified_files(self) -> list:
+        git = Git(self._project_dir)
+        return git.ls_files('-m').splitlines()
+
     def mark(self):
+        # Check if we have all files commited
+        modified_files = self.get_uncommited_modified_files()
+        if len(modified_files):
+            self.log.error('There are modified files that are not commited! {}'.format(modified_files))
+            return
+
         current_version = self.find_version()
 
         if self._options['<version>'].startswith('+'):
@@ -323,8 +333,7 @@ class Version(object):
         # first add all modified files
 
         if self._config['GIT']['AUTO_COMMIT']:
-            for modified_file in modified_files:
-                repo.index.add(modified_file)
+            repo.index.add(modified_files)
 
             repo.index.commit(self.build_commit_message(set_version))
 
@@ -332,13 +341,13 @@ class Version(object):
             repo.create_tag(str(set_version), message=self.build_commit_message(set_version))
 
         if self._config['GIT']['AUTO_PUSH'] is True:
-            repo.remotes.origin.push()
+            repo.remotes.origin.push(str(set_version))
         elif isinstance(self._config['GIT']['AUTO_PUSH'], str):
             origin = getattr(repo.remotes, self._config['GIT']['AUTO_PUSH'])
             if not origin.exists():
                 raise ConfigurationError('Push origin {} not found'.format(self._config['GIT']['AUTO_PUSH']))
 
-            origin.push()
+            origin.push(str(set_version))
 
     def status(self):
         print('Current version is {}'.format(self.find_version()))

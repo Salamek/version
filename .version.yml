@@ -11,4 +11,3 @@ REGEXPS:
 VERSION_FILES:
     'version/__init__.py': 'python'
     'archlinux/PKGBUILD': 'PKGBUILD'
-    '*/__init__.py': 'python'
