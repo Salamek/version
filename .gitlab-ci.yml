@@ -41,7 +41,7 @@ package:debian:
 package:archlinux:
   stage: package
   script:
-    - pacman -Sy sudo git python-gitpython python-yaml python-docopt fakeroot systemd binutils --noconfirm
+    - pacman -Sy sudo git python-gitpython python-yaml python-docopt fakeroot systemd binutils python-setuptools --noconfirm
     - useradd -m -G users -s /bin/bash package
     - chown -R package:users archlinux
     - cd archlinux

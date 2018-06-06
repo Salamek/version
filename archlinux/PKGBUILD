@@ -10,7 +10,7 @@ depends=(
     'python'
     'python-yaml'
     'python-docopt'
-    'python-git'
+    'python-gitpython'
 )
 
 prepare() {
