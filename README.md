@@ -119,4 +119,7 @@ For more options use
 $ version --help
 ```
 
+# Mirrors
+This project is also mirrored to GitLab https://gitlab.com/Salamek/version
+
 Thats it!
