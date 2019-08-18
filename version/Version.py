@@ -125,7 +125,7 @@ class Version(object):
         :return: 
         """
         with open(self.get_config_file(), 'rb') as config_file_handle:
-            config = yaml.load(config_file_handle)
+            config = yaml.load(config_file_handle, Loader=yaml.SafeLoader)
 
             # Default options
             config['GIT'] = config.get('GIT', {})
