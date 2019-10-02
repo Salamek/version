@@ -25,10 +25,10 @@ $ wget -O - https://apt.salamek.cz/apt/conf/salamek.gpg.key|sudo apt-key add -
 $ echo "deb     https://apt.salamek.cz/apt all main" | sudo tee /etc/apt/sources.list.d/salamek.cz.list
 ```
 
-And then you can install a package python3-blacklist
+And then you can install a package `version`
 
 ```bash
-$ apt update && apt install python3-version
+$ apt update && apt install version
 ```
 
 ## Archlinux
