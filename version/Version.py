@@ -3,6 +3,7 @@ import yaml
 import re
 import glob
 import logging
+from importlib import import_module
 from git import Repo, Git
 from git.remote import PushInfo
 from version.exception import ConfigurationError, ProjectVersionError
@@ -17,6 +18,7 @@ class Version(object):
     log = logging.getLogger(__name__)
 
     _regexps = {}
+    _imported_modules = {}
 
     def __init__(self, options):
         """
@@ -31,6 +33,11 @@ class Version(object):
 
         self.compile_regexps()
 
+        self.import_modules()
+
+        self.repo = Repo(self._project_dir)
+        self.git = Git(self._project_dir)
+
     def compile_regexps(self) -> None:
         """
         Precompile regexps
@@ -38,6 +45,19 @@ class Version(object):
         """
         for name, regexp in self._config['REGEXPS'].items():
             self._regexps[name] = re.compile(regexp, re.MULTILINE)
+
+    def import_modules(self) -> None:
+        to_import = []
+        commit_parser = self._config.get('GIT', {}).get('COMMIT_PARSER')
+        if commit_parser:
+            to_import.append(commit_parser)
+
+        change_logs = self._config.get('CHANGE_LOGS', {}).items()
+        for change_log_file, change_log_config in change_logs:
+            to_import.append(change_log_config.get('generator'))
+
+        for package_module in to_import:
+            self._imported_modules[package_module] = self._import_and_return_package_module_class(package_module)
 
     @staticmethod
     def validate_config(config_dict: dict) -> None:
@@ -55,6 +75,17 @@ class Version(object):
         if not len(config_dict['REGEXPS']):
             raise ConfigurationError('Required config section REGEXPS is empty')
 
+        if config_dict.get('CHANGE_LOGS'):
+            if type(config_dict.get('CHANGE_LOGS')) != dict:
+                raise ConfigurationError('CHANGE_LOGS must be a dictionary')
+
+            for change_log_file, change_log_config in config_dict.get('CHANGE_LOGS').items():
+                if 'generator' not in change_log_config:
+                    raise ConfigurationError('generator is required in CHANGE_LOGS item')
+
+            if not config_dict.get('GIT', {}).get('COMMIT_PARSER'):
+                raise ConfigurationError('GIT.COMMIT_PARSER is not specified and it si needed for CHANGE_LOGS generator')
+
         # Check if all files have valid regexp names
         for file, regexp_name in config_dict['VERSION_FILES'].items():
             if regexp_name not in config_dict['REGEXPS']:
@@ -66,6 +97,16 @@ class Version(object):
         :return: 
         """
         return self._project_dir
+
+    def _import_and_return_package_module_class(self, package_module: str):
+        if ':' in package_module:
+            package, package_class = package_module.split(':')
+        else:
+            package = package_module
+            package_class = package_module.split('.')[-1]
+
+        imported_package = import_module(package)
+        return getattr(imported_package, package_class)
 
     def _resolve_project_dir(self) -> str:
         """
@@ -136,6 +177,12 @@ class Version(object):
 
             return config
 
+    def find_changelog(self):
+        if self._config.get('CHANGE_LOGS'):
+            for change_log_file, change_log_generator in self._config.get('CHANGE_LOGS').items():
+                print(change_log_file)
+                print(change_log_generator)
+
     def find_version(self) -> StrictVersion:
         """
         Find project current version and check for mismatch
@@ -202,6 +249,26 @@ class Version(object):
             raise ProjectVersionError
 
         return StrictVersion(next(iter(versions.values())))
+
+    def generate_change_log(self, version: StrictVersion, dry: bool=False) -> list:
+        files = []
+        if self._config.get('CHANGE_LOGS'):
+            commit_parser_module = self._config.get('GIT', {}).get('COMMIT_PARSER')
+
+            for change_log_file, change_log_generator_info in self._config.get('CHANGE_LOGS').items():
+                change_log_generator = self._imported_modules[change_log_generator_info.get('generator')](self.git, change_log_file, change_log_generator_info.get('types'), **change_log_generator_info.get('arguments', {}))
+
+                last_version = change_log_generator.get_last_version()
+                commit_parser = self._imported_modules[commit_parser_module](self.git, last_version)
+                change_log = commit_parser.get_change_log()
+                if dry:
+                    print('New changelog:')
+                    print(change_log_generator.generate(change_log, version, True))
+                else:
+                    change_log_generator.generate(change_log, version)
+                    files.append(change_log_file)
+
+        return files
 
     def mark_version_files(self, version: StrictVersion, dry: bool=False) -> list:
         """
@@ -334,8 +401,8 @@ class Version(object):
         Return uncommited modified files
         :return: list
         """
-        git = Git(self._project_dir)
-        return git.ls_files('-m').splitlines()
+
+        return self.git.ls_files('-m').splitlines()
 
     def mark(self) -> None:
         """
@@ -400,32 +467,33 @@ class Version(object):
             if ok.strip() == 'n':
                 print('Maybe next time... BYE!')
                 return
-        modified_files = self.mark_version_files(set_version, dry=self._options['--dry'])
+        modified_version_files = self.mark_version_files(set_version, dry=self._options['--dry'])
+        modified_change_log_files = self.generate_change_log(set_version, dry=self._options['--dry'])
+        modified_files = modified_version_files + modified_change_log_files
         self.log.debug('Modified files: {}'.format(modified_files))
-        self.log.info('{} files has been modified to contain version string {}'.format(len(modified_files), set_version))
-
-        repo = Repo(self._project_dir)
+        self.log.info('{} files has been modified to contain version string {}'.format(len(modified_version_files), set_version))
+        self.log.info('{} files has been modified to contain change log for {}'.format(len(modified_change_log_files), set_version))
 
         # first add all modified files
 
-        if self._config['GIT']['AUTO_COMMIT']:
-            repo.index.add(modified_files)
+        if self._config['GIT']['AUTO_COMMIT'] and not self._options['--dry']:
+            self.repo.index.add(modified_files)
 
-            repo.index.commit(self.build_commit_message(set_version))
+            self.repo.index.commit(self.build_commit_message(set_version))
             self.log.info('{} files has been commited'.format(len(modified_files)))
 
-        if self._config['GIT']['AUTO_TAG']:
-            repo.create_tag(str(set_version), message=self.build_commit_message(set_version))
+        if self._config['GIT']['AUTO_TAG'] and not self._options['--dry']:
+            self.repo.create_tag(str(set_version), message=self.build_commit_message(set_version))
             self.log.info('Tag {} has been created'.format(set_version))
 
-        if self._config['GIT']['AUTO_PUSH'] is True:
-            result = repo.remotes.origin.push().pop()
+        if self._config['GIT']['AUTO_PUSH'] is True  and not self._options['--dry']:
+            result = self.repo.remotes.origin.push().pop()
             if not result.flags & PushInfo.ERROR:
                 self.log.info('Changes has been pushed to origin')
-                repo.remotes.origin.push(str(set_version))
+                self.repo.remotes.origin.push(str(set_version))
                 self.log.info('Tag has been pushed to origin')
-        elif isinstance(self._config['GIT']['AUTO_PUSH'], str):
-            origin = getattr(repo.remotes, self._config['GIT']['AUTO_PUSH'])
+        elif isinstance(self._config['GIT']['AUTO_PUSH'], str) and not self._options['--dry']:
+            origin = getattr(self.repo.remotes, self._config['GIT']['AUTO_PUSH'])
             if not origin.exists():
                 raise ConfigurationError('Push origin {} not found'.format(self._config['GIT']['AUTO_PUSH']))
 
