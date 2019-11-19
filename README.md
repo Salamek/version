@@ -13,6 +13,7 @@ Version is simple tool to manage multiple version files in your project and comm
 7. Checks validity of newly set version
 8. Can advance patch/minor/major version by simply using "+" notation (see usage section)
 9. Currently this tool assumes that you are using GIT as your VCS, if do you wish to use this tool without GIT or with different VCS let me know in Issue.
+10. It can generate CHANGELOG using specified commit parser and changelog generator
 
 # Installation
 
@@ -75,6 +76,17 @@ VERSION_FILES:
     'version/__init__.py': 'python'
     'setup.py': 'setup.py'
     'archlinux/PKGBUILD': 'PKGBUILD'
+
+# Change log generator
+CHANGE_LOGS:
+    'debian/changelog': # Relative change log path
+        'generator': 'version.change_log.Debian' # Generator to use
+        'types': ['fix', 'feat'] # Types of commits to use
+        'arguments': # Special arguments for generator (in this case 'version.change_log.Debian')
+            'project_name': 'attendance-gui'
+            'stability': 'unstable'
+            'urgency': 'medium'
+
 ```
 
 # Usage
