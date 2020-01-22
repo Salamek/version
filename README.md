@@ -22,8 +22,8 @@ Version is simple tool to manage multiple version files in your project and comm
 Add repository by running these commands
 
 ```bash
-$ wget -O - https://apt.salamek.cz/apt/conf/salamek.gpg.key|sudo apt-key add -
-$ echo "deb     https://apt.salamek.cz/apt all main" | sudo tee /etc/apt/sources.list.d/salamek.cz.list
+$ wget -O - https://repository.salamek.cz/deb/salamek.gpg.key|sudo apt-key add -
+$ echo "deb     https://repository.salamek.cz/deb/pub all main" | sudo tee /etc/apt/sources.list.d/salamek.cz.list
 ```
 
 And then you can install a package `version`
@@ -38,7 +38,7 @@ Add repository by adding this at end of file /etc/pacman.conf
 
 ```
 [salamek]
-Server = https://arch.salamek.cz/any
+Server = https://repository.salamek.cz/arch/pub
 SigLevel = Optional
 ```
 
