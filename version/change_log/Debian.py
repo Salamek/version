@@ -1,6 +1,7 @@
-
+import os
 import re
 import datetime
+from typing import Union
 from git import Git
 from distutils.version import StrictVersion
 from version.change_log.IChangeLog import IChangeLog
@@ -16,7 +17,7 @@ class Debian(IChangeLog):
 
         self.git = git
         self.change_log_file = change_log_file
-        self.message_types = [CommitTypeEnum(mt) for mt in message_types] if message_types else [CommitTypeEnum.FEAT, CommitTypeEnum.FIX]
+        self.message_types = message_types
         self.project_name = project_name
         self.stability = stability if stability else 'unstable'
         self.urgency = urgency if urgency else 'medium'
@@ -30,7 +31,7 @@ class Debian(IChangeLog):
             CommitTypeEnum.TEST: 'Tests',
         }
 
-    def get_last_version(self):
+    def get_last_version(self) -> Union[StrictVersion, None]:
         with open(self.change_log_file, 'r') as f:
             matches = self.last_version_regex.findall(f.read())
             if not matches:
@@ -64,6 +65,7 @@ class Debian(IChangeLog):
         new_content = '\n'.join(rows)
 
         if not return_only:
+            os.makedirs(os.path.dirname(self.change_log_file), exist_ok=True)
             with open(self.change_log_file, 'r') as fr:
                 original_content = fr.read()
 
