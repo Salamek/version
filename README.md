@@ -22,8 +22,8 @@ Version is simple tool to manage multiple version files in your project and comm
 Add repository by running these commands
 
 ```bash
-$ wget -O - https://apt.salamek.cz/apt/conf/salamek.gpg.key|sudo apt-key add -
-$ echo "deb     https://apt.salamek.cz/apt all main" | sudo tee /etc/apt/sources.list.d/salamek.cz.list
+$ wget -O - https://repository.salamek.cz/deb/salamek.gpg.key|sudo apt-key add -
+$ echo "deb     https://repository.salamek.cz/deb/pub all main" | sudo tee /etc/apt/sources.list.d/salamek.cz.list
 ```
 
 And then you can install a package `version`
@@ -38,7 +38,7 @@ Add repository by adding this at end of file /etc/pacman.conf
 
 ```
 [salamek]
-Server = https://arch.salamek.cz/any
+Server = https://repository.salamek.cz/arch/pub
 SigLevel = Optional
 ```
 
@@ -60,6 +60,7 @@ GIT:
     AUTO_TAG: true # Create GIT tag with new version (default: true)
     AUTO_PUSH: true # Automaticaly push to repository false=disabled, true=enabled, 'remote_name'=enabled and push to remote_name (default: true)
     COMMIT_MESSAGE: 'New version {version}' # Message used in commit {version} is placeholder for new version string (default: 'New version {version}')
+    COMMIT_PARSER: 'version.commit_parser.Sematic' # What parser to use to parse commit messages for generating changelog
 
 # Array of regexps used to find version strings in your VERSION_FILES
 # key is name of regexp and value is regexp it self
