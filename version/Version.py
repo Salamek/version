@@ -7,6 +7,7 @@ from importlib import import_module
 from git import Repo, Git
 from git.remote import PushInfo
 from version.exception import ConfigurationError, ProjectVersionError
+from version.enums.CommitTypeEnum import CommitTypeEnum
 from distutils.version import StrictVersion
 
 
@@ -240,7 +241,7 @@ class Version(object):
         unique_versions = set(versions.values())
         if len(unique_versions) > 1:
             for unique_version in unique_versions:
-                for file_path in [k for k,v in versions.items() if v == unique_version]:
+                for file_path in [k for k, v in versions.items() if v == unique_version]:
                     self.log.error('File {} have different version than others {}'.format(
                         file_path,
                         unique_version)
@@ -256,13 +257,19 @@ class Version(object):
             commit_parser_module = self._config.get('GIT', {}).get('COMMIT_PARSER')
 
             for change_log_file, change_log_generator_info in self._config.get('CHANGE_LOGS').items():
-                change_log_generator = self._imported_modules[change_log_generator_info.get('generator')](self.git, change_log_file, change_log_generator_info.get('types'), **change_log_generator_info.get('arguments', {}))
+                message_types = change_log_generator_info.get('types')
+                change_log_generator = self._imported_modules[change_log_generator_info.get('generator')](
+                    self.git,
+                    change_log_file,
+                    [CommitTypeEnum(mt) for mt in message_types] if message_types else [CommitTypeEnum.FEAT, CommitTypeEnum.FIX],
+                    **change_log_generator_info.get('arguments', {})
+                )
 
                 last_version = change_log_generator.get_last_version()
                 commit_parser = self._imported_modules[commit_parser_module](self.git, last_version)
                 change_log = commit_parser.get_change_log()
                 if dry:
-                    print('New changelog:')
+                    print('New changelog ({}):'.format(change_log_file))
                     print(change_log_generator.generate(change_log, version, True))
                 else:
                     change_log_generator.generate(change_log, version)
