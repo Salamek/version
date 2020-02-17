@@ -60,6 +60,7 @@ GIT:
     AUTO_TAG: true # Create GIT tag with new version (default: true)
     AUTO_PUSH: true # Automaticaly push to repository false=disabled, true=enabled, 'remote_name'=enabled and push to remote_name (default: true)
     COMMIT_MESSAGE: 'New version {version}' # Message used in commit {version} is placeholder for new version string (default: 'New version {version}')
+    COMMIT_PARSER: 'version.commit_parser.Sematic' # What parser to use to parse commit messages for generating changelog
 
 # Array of regexps used to find version strings in your VERSION_FILES
 # key is name of regexp and value is regexp it self
