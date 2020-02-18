@@ -61,7 +61,7 @@ packagetest:debian:
     - cd deb_dist
     - apt install ./*.deb -qy
   tags:
-    - virtualbox-debian
+    - debian-systemd
   dependencies:
     - package:debian
   only:
@@ -74,7 +74,7 @@ packagetest:archlinux:
     - cd archlinux
     - pacman -U version*.pkg.tar.xz --noconfirm
   tags:
-    - virtualbox-archlinux
+    - archlinux-systemd
   dependencies:
     - package:archlinux
   only:
