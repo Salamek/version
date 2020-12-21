@@ -72,7 +72,7 @@ packagetest:archlinux:
   script:
     - pacman -Sy
     - cd archlinux
-    - pacman -U version*.pkg.tar.xz --noconfirm
+    - pacman -U version*.pkg.tar.zst --noconfirm
   tags:
     - archlinux-systemd
   dependencies:
