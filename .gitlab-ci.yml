@@ -64,8 +64,6 @@ packagetest:debian:
     - debian-systemd
   dependencies:
     - package:debian
-  only:
-    - tags
 
 packagetest:archlinux:
   stage: packagetest
@@ -77,8 +75,6 @@ packagetest:archlinux:
     - archlinux-systemd
   dependencies:
     - package:archlinux
-  only:
-    - tags
 
 repoupdate:
   stage: deploy
