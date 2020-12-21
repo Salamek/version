@@ -70,7 +70,7 @@ packagetest:debian:
 packagetest:archlinux:
   stage: packagetest
   script:
-    - pacman -Sy
+    - pacman -Syu --noconfirm
     - cd archlinux
     - pacman -U version*.pkg.tar.zst --noconfirm
   tags:
