@@ -1,5 +1,6 @@
 import os
 from git import Git
+from git.exc import GitCommandError
 from typing import Union
 from distutils.version import StrictVersion
 from version.change_log.IChangeLog import IChangeLog
@@ -27,8 +28,10 @@ class WhatIsNew(IChangeLog):
 
     def get_last_version(self) -> Union[StrictVersion, None]:
         # We will get last version from git tag
-
-        return StrictVersion(self.git.describe(abbrev=0))
+        try:
+            return StrictVersion(self.git.describe(abbrev=0))
+        except GitCommandError:
+            return None
 
     def generate(self, change_log: dict, version: StrictVersion, return_only: bool = False) -> str:
         rows = [
