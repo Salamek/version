@@ -1,7 +1,7 @@
 stages:
   - test
   - package
-  - packagetest
+#  - packagetest
   - deploy
 
 test:debian:
@@ -54,27 +54,27 @@ package:archlinux:
       - archlinux/version*
     expire_in: 1d
 
-packagetest:debian:
-  stage: packagetest
-  script:
-    - apt-get update -qy
-    - cd deb_dist
-    - apt install ./*.deb -qy
-  tags:
-    - debian-systemd
-  dependencies:
-    - package:debian
+#packagetest:debian:
+#  stage: packagetest
+#  script:
+#    - apt-get update -qy
+#    - cd deb_dist
+#    - apt install ./*.deb -qy
+#  tags:
+#    - debian-systemd
+#  dependencies:
+#    - package:debian
 
-packagetest:archlinux:
-  stage: packagetest
-  script:
-    - pacman -Syu --noconfirm
-    - cd archlinux
-    - pacman -U version*.pkg.tar.zst --noconfirm
-  tags:
-    - archlinux-systemd
-  dependencies:
-    - package:archlinux
+#packagetest:archlinux:
+#  stage: packagetest
+#  script:
+#    - pacman -Syu --noconfirm
+#    - cd archlinux
+#    - pacman -U version*.pkg.tar.zst --noconfirm
+#  tags:
+#    - archlinux-systemd
+#  dependencies:
+#    - package:archlinux
 
 repoupdate:
   stage: deploy
