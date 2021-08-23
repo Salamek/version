@@ -27,7 +27,7 @@ package:debian:
   stage: package
   script:
     - apt-get update -qy
-    - apt-get install -y python3-git python-all python3-stdeb git python3-docopt python3-yaml
+    - apt-get install -y python3-git python-all python3-stdeb git python3-docopt python3-yaml dh-python
     - rm -rf "./deb_dist"
     - python3 setup.py --command-packages=stdeb.command bdist_deb
   tags:
