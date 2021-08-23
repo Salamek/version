@@ -447,8 +447,8 @@ class Version(object):
                 self.log.error('Invalid version string {}'.format(self._options['<version>']))
                 return
 
-        if current_version >= set_version:
-            self.log.error('Current version is >= to new version ({} >= {})'.format(
+        if current_version >= set_version and not self._options['--force']:
+            self.log.error('Current version is >= to new version ({} >= {}), use --force to override this check'.format(
                 current_version,
                 set_version
             ))
