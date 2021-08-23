@@ -26,21 +26,8 @@ class ColoredFormatter(logging.Formatter):
         :param datefmt: datetime format
         :param use_color: use colors
         """
-        logging.Formatter.__init__(self, self.formatter_message(fmt, use_color), datefmt)
+        logging.Formatter.__init__(self, fmt, datefmt)
         self.use_color = use_color
-
-    def formatter_message(self, message: str, use_color: bool=True) -> str:
-        """
-        Format single message
-        :param message: message to format
-        :param use_color: use colors
-        :return: 
-        """
-        if use_color:
-            message = message.replace("$RESET", self.RESET_SEQ).replace("$BOLD", self.BOLD_SEQ)
-        else:
-            message = message.replace("$RESET", "").replace("$BOLD", "")
-        return message
 
     def format(self, record: logging.LogRecord) -> str:
         levelname = record.levelname

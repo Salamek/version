@@ -40,7 +40,7 @@ from docopt import docopt
 logging_level = logging.INFO
 console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setLevel(logging_level)
-fmt = '[%(levelname)-18s] $BOLD%(asctime)s.%(msecs).03d %(process)d %(filename)s:$RESET%(lineno)d] %(message)s'
+fmt = '[%(levelname)-19s] %(message)s'
 datefmt = '%m%d %H:%M:%S'
 console_handler.setFormatter(ColoredFormatter(fmt, datefmt))
 
