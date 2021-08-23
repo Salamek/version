@@ -88,9 +88,9 @@ repoupdate:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
     - ssh www-data@repository 'rm -rf /var/www/repository.salamek.cz/www/arch/pub/any/version*.pkg.tar.xz'
-    - ssh www-data@repository 'rm -rf /var/www/repository.salamek.cz/cache/deb/pub/version*.deb'
+    - ssh www-data@repository 'rm -rf /var/www/repository.salamek.cz/cache/deb/pub/all/version*.deb'
     - scp archlinux/version*.pkg.tar.zst www-data@repository:/var/www/repository.salamek.cz/www/arch/pub/any
-    - scp deb_dist/*.deb www-data@repository:/var/www/repository.salamek.cz/cache/deb/pub
+    - scp deb_dist/*.deb www-data@repository:/var/www/repository.salamek.cz/cache/deb/pub/all
     - ssh www-data@repository '/var/www/repository.salamek.cz/deb-pub-update.sh'
     - ssh www-data@repository '/var/www/repository.salamek.cz/arch-pub-update.sh'
   dependencies:
