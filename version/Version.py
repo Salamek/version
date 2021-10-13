@@ -391,6 +391,7 @@ class Version(object):
         version_modify = list(new_version.version)
         version_modify[0] = version_modify[0] + by
         version_modify[1] = 0
+        version_modify[2] = 0
         new_version.version = tuple(version_modify)
 
         return new_version
