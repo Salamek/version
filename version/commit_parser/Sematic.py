@@ -37,10 +37,17 @@ class Sematic(ICommitParser):
         if to_version:
             tags = filter(lambda tag: tag <= self.to_version, tags)
 
-        return tags
+        return list(tags)
 
     def get_tags_ranges(self, from_version: StrictVersion = None, to_version: StrictVersion = None) -> Generator[Tuple[str, str], None, None]:
         tags = self.get_tags_in_range(from_version, to_version)
+
+        # Does to version exists in tags?
+        # If it does not, use last tag + HEAD
+        if self.to_version not in self.get_tags():
+            # Requested to_version is in tags
+            yield tags[0], 'HEAD'
+
         buffer = []
         for index, tag in enumerate(tags):
             if len(buffer) < 2:
@@ -49,12 +56,6 @@ class Sematic(ICommitParser):
                 buffer.reverse()
                 yield tuple(buffer)
                 buffer = [buffer[0]]
-
-        # Does to version exists in tags?
-        # If it does not, use HEAD
-        if self.to_version in self.get_tags():
-            # Requested to_version is in tags
-            yield buffer[0], 'HEAD'
 
     def get_parsed_versions(self) -> Generator[ParsedVersion, None, None]:
         change_log = {}
@@ -73,7 +74,6 @@ class Sematic(ICommitParser):
                 log = self.git.log(['{}...{}'.format(first_commit, to_version_str), '--oneline'])
 
             found_commits = self.regex.findall(log)
-
             for found_commit in found_commits:
                 info_len = len(found_commit)
                 if info_len == 3:
@@ -114,7 +114,7 @@ class Sematic(ICommitParser):
                 ))
 
             yield ParsedVersion(
-                version=StrictVersion(to_version_str),
+                version=self.to_version if to_version_str == 'HEAD' else StrictVersion(to_version_str),
                 parsed_commit_types=parsed_commit_types
             )
 
