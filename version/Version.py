@@ -251,7 +251,7 @@ class Version(object):
 
         return StrictVersion(next(iter(versions.values())))
 
-    def generate_change_log(self, version: StrictVersion, dry: bool=False) -> list:
+    def generate_change_log(self, version: StrictVersion, from_version: StrictVersion = None, dry: bool=False) -> list:
         files = []
         if self._config.get('CHANGE_LOGS'):
             commit_parser_module = self._config.get('GIT', {}).get('COMMIT_PARSER')
@@ -265,8 +265,7 @@ class Version(object):
                     **change_log_generator_info.get('arguments', {})
                 )
 
-                last_version = change_log_generator.get_last_version()
-                commit_parser = self._imported_modules[commit_parser_module](self.git, last_version)
+                commit_parser = self._imported_modules[commit_parser_module](self.git, from_version or change_log_generator.get_last_version())
                 change_log = commit_parser.get_change_log()
                 if dry:
                     print('New changelog ({}):'.format(change_log_file))

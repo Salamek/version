@@ -10,11 +10,14 @@ Website: https://github.com/Salamek/version
 Command details:
     mark                Mark project specified by --project_dir by <version>.
     status              Show current --project_dir version.
+    changelog           Changelog.
 
 
 Usage:
     version mark <version> [-p DIR] [-c FILE] [--dry] [--all_yes] [--force]
     version status [-p DIR] [-c FILE]
+    version changelog info
+    version changelog generate <from_version> <to_version>
     version 
     version <version> [-p DIR] [-c FILE] [--dry] [--all_yes] [--force]
     version (-h | --help)
@@ -32,6 +35,7 @@ Options:
 import signal
 import sys
 import logging
+from distutils.version import StrictVersion
 from version.Version import Version
 from version.logging.ColoredFormatter import ColoredFormatter
 
@@ -69,6 +73,20 @@ def main() -> None:
             print('Please specify mark version')
         else:
             version.mark()
+    elif options['changelog']:
+        # Changelog CLI
+        if options['info']:
+            # Print info
+            version.find_changelog()
+        elif options['generate']:
+            # Generate changelog
+
+            if options['<to_version>'].lower() == 'head':
+                to_version = version.find_version()
+            else:
+                to_version = StrictVersion(options['<to_version>'])
+            version.generate_change_log(to_version, from_version=StrictVersion(options['<from_version>']))
+
     elif not options['<version>'] or options['status']:
         version.status()
 

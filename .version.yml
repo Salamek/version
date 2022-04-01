@@ -3,6 +3,7 @@ GIT:
     AUTO_TAG: true
     AUTO_PUSH: true # false=disabled, true=enabled, 'remote_name'=enabled and push to remote_name
     COMMIT_MESSAGE: 'New version {version}'
+    COMMIT_PARSER: 'version.commit_parser.Sematic:Sematic'
 
 REGEXPS:
     'python': __version__\s*=\s*\'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)\'
@@ -13,3 +14,8 @@ VERSION_FILES:
     'version/__init__.py': 'python'
     'setup.py': 'setup.py'
     'archlinux/PKGBUILD': 'PKGBUILD'
+
+CHANGE_LOGS:
+    'CHANGELOG.md':
+        'generator': 'version.change_log.WhatIsNew'
+        'types': ['fix', 'feat']

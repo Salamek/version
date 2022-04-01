@@ -35,7 +35,7 @@ class WhatIsNew(IChangeLog):
 
     def generate(self, change_log: dict, version: StrictVersion, return_only: bool = False) -> str:
         rows = [
-            'What is new in version {} ?'.format(version),
+            '# What is new in version {} ?'.format(version),
             ''
         ]
 
@@ -51,6 +51,7 @@ class WhatIsNew(IChangeLog):
                     rows.append('      * {}'.format(item))
 
         rows.append('')
+        rows.append('')
 
         new_content = '\n'.join(rows)
 
@@ -58,7 +59,11 @@ class WhatIsNew(IChangeLog):
             dir_name = os.path.dirname(self.change_log_file)
             if dir_name:
                 os.makedirs(dir_name, exist_ok=True)
+
+            with open(self.change_log_file, 'r') as fr:
+                original_content = fr.read()
+
             with open(self.change_log_file, 'w') as fw:
-                fw.write(new_content)
+                fw.write(new_content+original_content)
 
         return new_content
