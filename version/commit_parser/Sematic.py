@@ -1,7 +1,7 @@
 
 import re
 import logging
-from typing import List, Generator
+from typing import List, Generator, Tuple
 from git import Git, exc
 from distutils.version import StrictVersion
 from version.commit_parser.ICommitParser import ICommitParser
@@ -9,11 +9,10 @@ from version.enums.CommitTypeEnum import CommitTypeEnum
 from version.commit_parser.models import ParsedVersion, ParsedCommitGroup, ParsedCommit, ParsedCommitType
 
 
-
 class Sematic(ICommitParser):
     log = logging.getLogger(__name__)
 
-    def __init__(self, git: Git, from_version: StrictVersion=None, to_version: StrictVersion=None):
+    def __init__(self, git: Git, from_version: StrictVersion = None, to_version: StrictVersion = None):
         self.git = git
 
         self.from_version = from_version
@@ -25,38 +24,43 @@ class Sematic(ICommitParser):
 
     def get_tags(self) -> List[StrictVersion]:
         tags_str = self.git.tag(['--sort=-committerdate']).splitlines()
-
         tags = [StrictVersion(tag_str) for tag_str in tags_str]
+        tags.sort(reverse=True)
+        return tags
 
-        if self.from_version:
+    def get_tags_in_range(self, from_version: StrictVersion = None, to_version: StrictVersion = None) -> List[StrictVersion]:
+        tags = self.get_tags()
+
+        if from_version:
             tags = filter(lambda tag: tag >= self.from_version, tags)
 
-        if self.to_version:
+        if to_version:
             tags = filter(lambda tag: tag <= self.to_version, tags)
 
-        tags_list = list(tags)
-        tags_list.sort(reverse=True)
+        return tags
 
-        return tags_list
-
-    def get_tags_ranges(self):
-        tags = self.get_tags()
+    def get_tags_ranges(self, from_version: StrictVersion = None, to_version: StrictVersion = None) -> Generator[Tuple[str, str], None, None]:
+        tags = self.get_tags_in_range(from_version, to_version)
         buffer = []
         for index, tag in enumerate(tags):
             if len(buffer) < 2:
-                buffer.append(tag)
+                buffer.append(str(tag))
             else:
                 buffer.reverse()
                 yield tuple(buffer)
                 buffer = [buffer[0]]
 
+        # Does to version exists in tags?
+        # If it does not, use HEAD
+        if self.to_version in self.get_tags():
+            # Requested to_version is in tags
+            yield buffer[0], 'HEAD'
+
     def get_parsed_versions(self) -> Generator[ParsedVersion, None, None]:
         change_log = {}
 
-        tags_ranges = self.get_tags_ranges()
-        for from_version, to_version in tags_ranges:
-            from_version_str = str(from_version)
-            to_version_str = str(to_version)
+        tags_ranges = self.get_tags_ranges(self.from_version, self.to_version)
+        for from_version_str, to_version_str in tags_ranges:
             try:
                 log = self.git.log(['{}...{}'.format(from_version_str, to_version_str), '--oneline'])
             except exc.GitCommandError as e:
@@ -94,7 +98,7 @@ class Sematic(ICommitParser):
                 change_log[to_version_str][commit_type_enum][commit_group].append((revision, description))
 
         # Rework that shit ^ into dataclases
-        for to_version, commit_types in change_log.items():
+        for to_version_str, commit_types in change_log.items():
             parsed_commit_types = []
             for commit_type_enum, commit_groups in commit_types.items():
                 parsed_commit_groups = []
@@ -110,7 +114,7 @@ class Sematic(ICommitParser):
                 ))
 
             yield ParsedVersion(
-                version=StrictVersion(to_version),
+                version=StrictVersion(to_version_str),
                 parsed_commit_types=parsed_commit_types
             )
 
