@@ -60,8 +60,11 @@ class WhatIsNew(IChangeLog):
             if dir_name:
                 os.makedirs(dir_name, exist_ok=True)
 
-            with open(self.change_log_file, 'r') as fr:
-                original_content = fr.read()
+            try:
+                with open(self.change_log_file, 'r') as fr:
+                    original_content = fr.read()
+            except FileNotFoundError:
+                original_content = ''
 
             with open(self.change_log_file, 'w') as fw:
                 fw.write(new_content+original_content)
