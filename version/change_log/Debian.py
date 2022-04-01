@@ -1,9 +1,10 @@
 import os
 import re
 import datetime
-from typing import Union
+from typing import Union, Generator, List
 from git import Git
 from distutils.version import StrictVersion
+from version.commit_parser.models import ParsedVersion
 from version.change_log.IChangeLog import IChangeLog
 from version.enums.CommitTypeEnum import CommitTypeEnum
 
@@ -32,35 +33,51 @@ class Debian(IChangeLog):
         }
 
     def get_last_version(self) -> Union[StrictVersion, None]:
-        with open(self.change_log_file, 'r') as f:
-            matches = self.last_version_regex.findall(f.read())
-            if not matches:
-                return None
-            major, minor, patch, stability, urgency = matches[0]
+        try:
+            with open(self.change_log_file, 'r') as f:
+                matches = self.last_version_regex.findall(f.read())
+                if not matches:
+                    return None
+                major, minor, patch, stability, urgency = matches[0]
 
-            return StrictVersion('{}.{}.{}'.format(major, minor, patch))
+                return StrictVersion('{}.{}.{}'.format(major, minor, patch))
+        except FileNotFoundError:
+            return None
 
-    def generate(self, change_log: dict, version: StrictVersion,  return_only: bool=False) -> str:
+    def _generate_version_block(self, parsed_version: ParsedVersion) -> List[str]:
         rows = [
-            '{} ({}) {}; urgency={}'.format(self.project_name, version, self.stability, self.urgency),
+            '{} ({}) {}; urgency={}'.format(self.project_name, parsed_version.version, self.stability, self.urgency),
             ''
         ]
 
-        if not change_log:
-            rows.append('  * Nothing worth mentioning')
-        for commit_type, groups in change_log.items():
-            if commit_type not in self.message_types:
+        rows_content = []
+        for parsed_commit_type in parsed_version.parsed_commit_types:
+
+            if parsed_commit_type.commit_type_enum not in self.message_types:
                 continue
-            rows.append('  * {}'.format(self.commit_type_names.get(commit_type, commit_type)))
-            for group_name, group_items in groups.items():
-                rows.append('    * {}'.format(group_name))
-                for item in group_items:
-                    rows.append('      * {}'.format(item))
+            rows_content.append('  * {}'.format(self.commit_type_names.get(parsed_commit_type.commit_type_enum, parsed_commit_type.commit_type_enum)))
+            for parsed_commit_group in parsed_commit_type.parsed_commit_groups:
+                rows_content.append('    * {}'.format(parsed_commit_group.name))
+                for parsed_commit in parsed_commit_group.parsed_commits:
+                    rows_content.append('      * {} {}'.format(parsed_commit.revision, parsed_commit.description))
+
+        if not rows_content:
+            rows.append('  * Nothing worth mentioning')
+        else:
+            rows.extend(rows_content)
 
         rows.append('')
-        rows.append(' -- {} <{}>  {}'.format(self.git.config(['user.name']), self.git.config(['user.email']), datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).strftime("%a, %d %b %Y %H:%M:%S %z")))
+        rows.append(' -- {} <{}>  {}'.format(self.git.config(['user.name']), self.git.config(['user.email']),
+                                             datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).strftime("%a, %d %b %Y %H:%M:%S %z")))
         rows.append('')
         rows.append('')
+
+        return rows
+
+    def generate(self, parsed_versions: Generator[ParsedVersion, None, None], return_only: bool = False) -> str:
+        rows = []
+        for parsed_version in parsed_versions:
+            rows.extend(self._generate_version_block(parsed_version))
 
         new_content = '\n'.join(rows)
 

@@ -17,7 +17,7 @@ Usage:
     version mark <version> [-p DIR] [-c FILE] [--dry] [--all_yes] [--force]
     version status [-p DIR] [-c FILE]
     version changelog info
-    version changelog generate <from_version> <to_version>
+    version changelog generate <from_version> <to_version> [--dry]
     version 
     version <version> [-p DIR] [-c FILE] [--dry] [--all_yes] [--force]
     version (-h | --help)
@@ -85,7 +85,13 @@ def main() -> None:
                 to_version = version.find_version()
             else:
                 to_version = StrictVersion(options['<to_version>'])
-            version.generate_change_log(to_version, from_version=StrictVersion(options['<from_version>']))
+
+            if options['<from_version>'].lower() == 'changelog_head':
+                from_version = None
+            else:
+                from_version = StrictVersion(options['<from_version>'])
+
+            version.generate_change_log(to_version, from_version=from_version)
 
     elif not options['<version>'] or options['status']:
         version.status()

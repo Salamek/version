@@ -265,13 +265,17 @@ class Version(object):
                     **change_log_generator_info.get('arguments', {})
                 )
 
-                commit_parser = self._imported_modules[commit_parser_module](self.git, from_version or change_log_generator.get_last_version())
-                change_log = commit_parser.get_change_log()
+                if not from_version:
+                    from_version = change_log_generator.get_last_version() or StrictVersion('0.0.1')
+
+                commit_parser = self._imported_modules[commit_parser_module](self.git, from_version, version)
+
+                parsed_versions = commit_parser.get_parsed_versions()
                 if dry:
                     print('New changelog ({}):'.format(change_log_file))
-                    print(change_log_generator.generate(change_log, version, True))
+                    print(change_log_generator.generate(parsed_versions, True))
                 else:
-                    change_log_generator.generate(change_log, version)
+                    change_log_generator.generate(parsed_versions)
                     files.append(change_log_file)
 
         return files

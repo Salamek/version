@@ -17,5 +17,5 @@ VERSION_FILES:
 
 CHANGE_LOGS:
     'CHANGELOG.md':
-        'generator': 'version.change_log.WhatIsNew'
+        'generator': 'version.change_log.Debian'
         'types': ['fix', 'feat']
