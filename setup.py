@@ -19,7 +19,7 @@ classifiers = [s.strip() for s in classes.split('\n') if s]
 
 setup(
     name='version',
-    version='1.3.0',
+    version='1.3.1',
     description='Simple helper python application to set version of project and create tags in git',
     long_description=open('README.md').read(),
     author='Adam Schubert',
