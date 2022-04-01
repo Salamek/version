@@ -65,7 +65,9 @@ class Debian(IChangeLog):
         new_content = '\n'.join(rows)
 
         if not return_only:
-            os.makedirs(os.path.dirname(self.change_log_file), exist_ok=True)
+            dir_name = os.path.dirname(self.change_log_file)
+            if dir_name:
+                os.makedirs(dir_name, exist_ok=True)
             with open(self.change_log_file, 'r') as fr:
                 original_content = fr.read()
 
