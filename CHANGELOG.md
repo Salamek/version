@@ -1,3 +1,11 @@
+None (1.3.3) unstable; urgency=medium
+
+  * Fixes
+    * Changelog
+      * 073b239 Debian changelog, generate date correctly
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Sat, 02 Apr 2022 17:06:10 +0000
+
 None (1.3.2) unstable; urgency=medium
 
   * Fixes

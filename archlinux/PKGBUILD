@@ -1,5 +1,5 @@
 pkgname=version
-pkgver=1.3.2
+pkgver=1.3.3
 pkgdesc="Simple helper python application to set version of project and create tags in git"
 pkgrel=1
 arch=('any')
