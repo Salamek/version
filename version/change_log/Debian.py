@@ -2,7 +2,7 @@ import os
 import re
 import datetime
 import json
-from typing import Union, Generator, List
+from typing import Union, Generator, List, Tuple
 from git import Git
 from distutils.version import StrictVersion
 from version.commit_parser.models import ParsedVersion
@@ -33,7 +33,7 @@ class Debian(IChangeLog):
             CommitTypeEnum.TEST: 'Tests',
         }
 
-    def _get_tag_info(self, tag_version: StrictVersion) -> Union[dict, None]:
+    def _get_tag_info(self, tag_version: StrictVersion) -> Union[Tuple[str, str, datetime.datetime], None]:
         result = self.git.for_each_ref([
             'refs/tags/{}'.format(str(tag_version)),
             '--format={\"taggerdate\": \"%(taggerdate)\", \"taggeremail\": \"%(taggeremail)\", \"taggername\": \"%(taggername)\"}'])
@@ -41,7 +41,14 @@ class Debian(IChangeLog):
         if not result:
             return None
 
-        return json.loads(result)
+        tag_info = json.loads(result)
+        taggername = tag_info.get('taggername')
+        taggeremail = tag_info.get('taggeremail')
+        taggerdate = tag_info.get('taggerdate')
+        if not taggername or not taggeremail or not taggerdate:
+            return None
+
+        return taggername, taggeremail.replace('<', '').replace('>', ''), datetime.datetime.strptime(taggerdate, '%a %b %d %H:%M:%S %Y %z')
 
     def get_last_version(self) -> Union[StrictVersion, None]:
         try:
@@ -81,17 +88,17 @@ class Debian(IChangeLog):
 
         tag_info = self._get_tag_info(parsed_version.version)
         if tag_info:
-            rows.append(' -- {} {}  {}'.format(
-                tag_info.get('taggername'),
-                tag_info.get('taggeremail'),
-                tag_info.get('taggerdate')
-            ))
+            name, email, date = tag_info
         else:
-            rows.append(' -- {} <{}>  {}'.format(
-                self.git.config(['user.name']),
-                self.git.config(['user.email']),
-                datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).strftime("%a, %d %b %Y %H:%M:%S %z"))
-            )
+            name = self.git.config(['user.name'])
+            email = self.git.config(['user.email'])
+            date = datetime.datetime.now(datetime.timezone.utc)
+
+        rows.append(' -- {} <{}>  {}'.format(
+            name,
+            email,
+            date.strftime("%a, %d %b %Y %H:%M:%S %z"))
+        )
 
         rows.append('')
         rows.append('')

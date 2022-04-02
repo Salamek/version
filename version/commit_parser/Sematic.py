@@ -78,7 +78,6 @@ class Sematic(ICommitParser):
 
                 log = self.git.log(['{}...{}'.format(first_commit, to_version_str), '--oneline'])
             found_commits = self.regex.findall(log)
-            print('{} -> {}: {}'.format(from_version_str, to_version_str, len(found_commits)))
             for found_commit in found_commits:
                 info_len = len(found_commit)
                 if info_len == 3:
