@@ -1,6 +1,7 @@
 import os
 import re
 import datetime
+import json
 from typing import Union, Generator, List
 from git import Git
 from distutils.version import StrictVersion
@@ -31,6 +32,13 @@ class Debian(IChangeLog):
             CommitTypeEnum.STYLE: 'Styling',
             CommitTypeEnum.TEST: 'Tests',
         }
+
+    def _get_tag_info(self, tag_version: StrictVersion) -> dict:
+        result = self.git.for_each_ref([
+            'refs/tags/{}'.format(str(tag_version)),
+            '--format={\"taggerdate\": \"%(taggerdate)\", \"taggeremail\": \"%(taggeremail)\", \"taggername\": \"%(taggername)\"}'])
+
+        return json.loads(result)
 
     def get_last_version(self) -> Union[StrictVersion, None]:
         try:
@@ -67,8 +75,14 @@ class Debian(IChangeLog):
             rows.extend(rows_content)
 
         rows.append('')
-        rows.append(' -- {} <{}>  {}'.format(self.git.config(['user.name']), self.git.config(['user.email']),
-                                             datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).strftime("%a, %d %b %Y %H:%M:%S %z")))
+
+        tag_info = self._get_tag_info(parsed_version.version)
+
+        rows.append(' -- {} {}  {}'.format(
+            tag_info.get('taggername'),
+            tag_info.get('taggeremail'),
+            tag_info.get('taggerdate')
+        ))
         rows.append('')
         rows.append('')
 
