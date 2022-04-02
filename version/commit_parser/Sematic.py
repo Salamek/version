@@ -52,15 +52,20 @@ class Sematic(ICommitParser):
         for index, tag in enumerate(tags):
             if len(buffer) < 2:
                 buffer.append(str(tag))
-            else:
+
+            if len(buffer) == 2:
                 buffer.reverse()
                 yield tuple(buffer)
                 buffer = [buffer[0]]
+
+        if len(buffer) == 1 and not from_version:
+            yield self.get_first_commit_hash(), buffer[0]
 
     def get_parsed_versions(self) -> Generator[ParsedVersion, None, None]:
         change_log = {}
 
         tags_ranges = self.get_tags_ranges(self.from_version, self.to_version)
+
         for from_version_str, to_version_str in tags_ranges:
             try:
                 log = self.git.log(['{}...{}'.format(from_version_str, to_version_str), '--oneline'])
@@ -72,8 +77,8 @@ class Sematic(ICommitParser):
                     raise e
 
                 log = self.git.log(['{}...{}'.format(first_commit, to_version_str), '--oneline'])
-
             found_commits = self.regex.findall(log)
+            print('{} -> {}: {}'.format(from_version_str, to_version_str, len(found_commits)))
             for found_commit in found_commits:
                 info_len = len(found_commit)
                 if info_len == 3:
@@ -96,6 +101,20 @@ class Sematic(ICommitParser):
                     change_log[to_version_str][commit_type_enum][commit_group] = []
 
                 change_log[to_version_str][commit_type_enum][commit_group].append((revision, description))
+
+            # After we processed all sematic Commits, lets process the rest
+            # Remove sematic commits from test
+            rest_log = self.regex.sub('', log)
+            if not change_log.get(to_version_str):
+                change_log[to_version_str] = {}
+            if not change_log.get(to_version_str, {}).get(CommitTypeEnum.CHORE):
+                change_log[to_version_str][CommitTypeEnum.CHORE] = {}
+            if not change_log.get(to_version_str, {}).get(CommitTypeEnum.CHORE, {}).get('Info'):
+                change_log[to_version_str][CommitTypeEnum.CHORE]['Info'] = []
+            for line in rest_log.splitlines():
+                revision = line[:7]
+                description = line[8:]
+                change_log[to_version_str][CommitTypeEnum.CHORE]['Info'].append((revision, description))
 
         # Rework that shit ^ into dataclases
         for to_version_str, commit_types in change_log.items():

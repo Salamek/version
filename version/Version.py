@@ -266,7 +266,8 @@ class Version(object):
                 )
 
                 if not from_version:
-                    from_version = change_log_generator.get_last_version() or StrictVersion('0.0.1')
+                    # Try to get from version from change log
+                    from_version = change_log_generator.get_last_version()
 
                 commit_parser = self._imported_modules[commit_parser_module](self.git, from_version, version)
 
