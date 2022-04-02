@@ -33,10 +33,13 @@ class Debian(IChangeLog):
             CommitTypeEnum.TEST: 'Tests',
         }
 
-    def _get_tag_info(self, tag_version: StrictVersion) -> dict:
+    def _get_tag_info(self, tag_version: StrictVersion) -> Union[dict, None]:
         result = self.git.for_each_ref([
             'refs/tags/{}'.format(str(tag_version)),
             '--format={\"taggerdate\": \"%(taggerdate)\", \"taggeremail\": \"%(taggeremail)\", \"taggername\": \"%(taggername)\"}'])
+
+        if not result:
+            return None
 
         return json.loads(result)
 
@@ -77,12 +80,19 @@ class Debian(IChangeLog):
         rows.append('')
 
         tag_info = self._get_tag_info(parsed_version.version)
+        if tag_info:
+            rows.append(' -- {} {}  {}'.format(
+                tag_info.get('taggername'),
+                tag_info.get('taggeremail'),
+                tag_info.get('taggerdate')
+            ))
+        else:
+            rows.append(' -- {} <{}>  {}'.format(
+                self.git.config(['user.name']),
+                self.git.config(['user.email']),
+                datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).strftime("%a, %d %b %Y %H:%M:%S %z"))
+            )
 
-        rows.append(' -- {} {}  {}'.format(
-            tag_info.get('taggername'),
-            tag_info.get('taggeremail'),
-            tag_info.get('taggerdate')
-        ))
         rows.append('')
         rows.append('')
 
