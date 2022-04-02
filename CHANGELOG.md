@@ -1,3 +1,11 @@
+None (1.3.5) unstable; urgency=medium
+
+  * Fixes
+    * Changelog
+      * 2286ead Fix when tagger info is missing
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Sat, 02 Apr 2022 18:12:40 +0000
+
 None (1.3.4) unstable; urgency=medium
 
   * Fixes
