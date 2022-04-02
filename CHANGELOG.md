@@ -1,3 +1,12 @@
+None (1.3.4) unstable; urgency=medium
+
+  * Fixes
+    * Changelog
+      * ff96e69 Use tag info only when avaiable
+      * a501512 Fixes in chagelog genreator to include tags with no matched commits
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Sat, 02 Apr 2022 17:57:32 +0000
+
 None (1.3.3) unstable; urgency=medium
 
   * Fixes
