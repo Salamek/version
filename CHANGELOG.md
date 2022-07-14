@@ -1,3 +1,11 @@
+None (1.3.6) unstable; urgency=medium
+
+  * Fixes
+    * Parsing
+      * 6723ad3 Fixes crash when patch version is not provided
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Thu, 14 Jul 2022 15:10:45 +0000
+
 None (1.3.5) unstable; urgency=medium
 
   * Fixes
