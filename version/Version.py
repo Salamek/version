@@ -211,7 +211,7 @@ class Version(object):
                             (major, minor) = version_match.group('major', 'minor')
 
                             try:
-                                version = tuple(map(int, [major, minor, version_match.group('patch')]))
+                                version = tuple(map(int, [major, minor, version_match.group('patch') or 0]))
                             except IndexError:
                                 version = tuple(map(int, [major, minor])) + (0,)
 
