@@ -42,6 +42,11 @@ class Sematic(ICommitParser):
     def get_tags_ranges(self, from_version: StrictVersion = None, to_version: StrictVersion = None) -> Generator[Tuple[str, str], None, None]:
         tags = self.get_tags_in_range(from_version, to_version)
 
+        if not tags:
+            # No tags detected, run from first hash to head
+            yield self.get_first_commit_hash(), 'HEAD'
+            return  # Return to prevent code below to run
+
         # Does to version exists in tags?
         # If it does not, use last tag + HEAD
         if self.to_version not in self.get_tags():
