@@ -1,3 +1,11 @@
+None (1.3.7) unstable; urgency=medium
+
+  * Fixes
+    * Sematic
+      * 348ad82 Fix crash when no tags exists
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Thu, 14 Jul 2022 20:51:12 +0000
+
 None (1.3.6) unstable; urgency=medium
 
   * Fixes
