@@ -1,3 +1,11 @@
+None (1.3.9) unstable; urgency=medium
+
+  * Fixes
+    * CI
+      * fab2e58 Fix arch test
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Wed, 10 May 2023 18:23:10 +0000
+
 None (1.3.8) unstable; urgency=medium
 
   * Nothing worth mentioning
