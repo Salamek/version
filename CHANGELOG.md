@@ -1,3 +1,11 @@
+None (1.4) unstable; urgency=medium
+
+  * Features
+    * Mark
+      * b3b958f Allow --force to force version when uncommited files are found
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Tue, 10 Oct 2023 10:04:10 +0000
+
 None (1.3.9) unstable; urgency=medium
 
   * Fixes
