@@ -1,3 +1,24 @@
+None (1.4.1) unstable; urgency=medium
+
+  * Fixes
+    * CI
+      * 031d254 Do not install python-all in Debian
+  * Features
+    * CI
+      * 5db44bf Install python3-venv for debian
+      * 76f0ef4 Test in env
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Tue, 10 Oct 2023 20:08:56 +0000
+
+
+None (1.4) unstable; urgency=medium
+
+  * Features
+    * Mark
+      * b3b958f Allow --force to force version when uncommited files are found
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Tue, 10 Oct 2023 12:04:10 +0200
+
 None (1.4) unstable; urgency=medium
 
   * Features
