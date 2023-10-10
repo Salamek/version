@@ -422,9 +422,9 @@ class Version(object):
         :return: None
         """
         # Check if we have all files commited
-        modified_files = self.get_uncommited_modified_files()
-        if len(modified_files):
-            self.log.error('There are modified files that are not commited! {}'.format(modified_files))
+        uncommited_modified_files = self.get_uncommited_modified_files()
+        if len(uncommited_modified_files) and not self._options['--force']:
+            self.log.error('There are modified files that are not commited! {}'.format(uncommited_modified_files))
             return
 
         current_version = self.find_version()
