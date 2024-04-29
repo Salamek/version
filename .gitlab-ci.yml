@@ -18,8 +18,8 @@ test:debian:
 test:archlinux:
   stage: test
   script:
-    - pacman -Sy python-pip python-setuptools --noconfirm
-    - python -m venv venv
+    - pacman -Sy python-pip python-setuptools python-virtualenv --noconfirm
+    - virtualenv -p python3 venv
     - venv/bin/pip install -r requirements.txt
     - venv/bin/python setup.py test
   tags:
