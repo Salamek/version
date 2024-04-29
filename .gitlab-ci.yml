@@ -22,6 +22,7 @@ test:archlinux:
     - pacman -Sy python-pip python-setuptools python-virtualenv --noconfirm
     - virtualenv -p python3 venv
     - venv/bin/pip install .
+    - venv/bin/pip install setuptools
     - venv/bin/python setup.py test
   tags:
     - archlinux
