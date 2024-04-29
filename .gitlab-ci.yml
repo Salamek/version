@@ -16,16 +16,15 @@ test:debian:
     - debian
 
 
-# @TODO enable when upstream bug is fixed
-#test:archlinux:
-#  stage: test
-#  script:
-#    - pacman -Sy python-pip python-setuptools python-virtualenv --noconfirm
-#    - virtualenv -p python3 venv
-#    - venv/bin/pip install -r requirements.txt
-#    - venv/bin/python setup.py test
-#  tags:
-#    - archlinux
+test:archlinux:
+  stage: test
+  script:
+    - pacman -Sy python-pip python-setuptools python-virtualenv --noconfirm
+    - virtualenv -p python3 venv
+    - venv/bin/pip install -r requirements.txt
+    - venv/bin/python setup.py test
+  tags:
+    - archlinux
 
 package:debian:
   stage: package
@@ -45,7 +44,7 @@ package:debian:
 package:archlinux:
   stage: package
   script:
-    - pacman -Sy sudo git python-gitpython python-yaml python-docopt fakeroot systemd binutils python-setuptools --noconfirm --overwrite "*"
+    - pacman -Sy sudo git python-gitpython python-yaml python-docopt fakeroot systemd binutils python-setuptools --noconfirm
     - useradd -m -G users -s /bin/bash package
     - chown -R package:users archlinux
     - cd archlinux
