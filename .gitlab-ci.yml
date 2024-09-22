@@ -45,7 +45,7 @@ package:debian:
 package:archlinux:
   stage: package
   script:
-    - pacman -Sy sudo git python-gitpython python-yaml python-docopt fakeroot systemd binutils python-setuptools base-devel --noconfirm
+    - pacman -Sy sudo git python-gitpython python-yaml python-docopt fakeroot binutils python-setuptools base-devel --noconfirm
     - useradd -m -G users -s /bin/bash package
     - chown -R package:users archlinux
     - cd archlinux
@@ -57,28 +57,6 @@ package:archlinux:
     paths:
       - archlinux/version*
     expire_in: 1d
-
-#packagetest:debian:
-#  stage: packagetest
-#  script:
-#    - apt-get update -qy
-#    - cd deb_dist
-#    - apt install ./*.deb -qy
-#  tags:
-#    - debian-systemd
-#  dependencies:
-#    - package:debian
-
-#packagetest:archlinux:
-#  stage: packagetest
-#  script:
-#    - pacman -Syu --noconfirm
-#    - cd archlinux
-#    - pacman -U version*.pkg.tar.zst --noconfirm
-#  tags:
-#    - archlinux-systemd
-#  dependencies:
-#    - package:archlinux
 
 repoupdate:
   stage: deploy
