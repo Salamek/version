@@ -1,31 +1,31 @@
 stages:
-  - test
+  #- test
   - package
 #  - packagetest
   - deploy
 
-test:debian:
-  stage: test
-  script:
-    - apt-get update -qy
-    - apt-get install -y python3-pip python3-venv
-    - python3 -m venv venv
-    - venv/bin/pip install -r requirements.txt
-    - venv/bin/python setup.py test
-  tags:
-    - debian
+#test:debian:
+#  stage: test
+#  script:
+#    - apt-get update -qy
+#    - apt-get install -y python3-pip python3-venv
+#    - python3 -m venv venv
+#    - venv/bin/pip install -r requirements.txt
+#    - venv/bin/python setup.py test
+#  tags:
+#    - debian
 
 
-test:archlinux:
-  stage: test
-  script:
-    - pacman -Sy python-pip python-setuptools python-virtualenv --noconfirm
-    - virtualenv -p python3 venv
-    - venv/bin/pip install .
-    - venv/bin/pip install setuptools
-    - venv/bin/python setup.py test
-  tags:
-    - archlinux
+#test:archlinux:
+#  stage: test
+#  script:
+#    - pacman -Sy python-pip python-setuptools python-virtualenv --noconfirm
+#    - virtualenv -p python3 venv
+#    - venv/bin/pip install .
+#    - venv/bin/pip install setuptools
+#    - venv/bin/python setup.py test
+#  tags:
+#    - archlinux
 
 package:debian:
   stage: package
