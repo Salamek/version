@@ -33,6 +33,7 @@ package:debian:
     - apt-get update -qy
     - apt-get install -y python3-git python3-stdeb git python3-docopt python3-yaml dh-python
     - rm -rf "./deb_dist"
+    - export DEB_BUILD_OPTIONS=nocheck
     - python3 setup.py --command-packages=stdeb.command bdist_deb
   tags:
     - debian
