@@ -1,3 +1,16 @@
+None (1.5.0) unstable; urgency=medium
+
+  * Fixes
+    * StrictVersion
+      * 4dcb85d Override _key too
+  * Features
+    * StrictVersion
+      * 8702bb5 Wrap packaging Version in StrictVersion, implement modification
+    * Deps
+      * fe8c1ce Migrate to packaging from distutils
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Sun, 22 Sep 2024 21:26:18 +0000
+
 None (1.4.3) unstable; urgency=medium
 
   * Features
