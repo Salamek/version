@@ -1,8 +1,8 @@
 import os
 import re
 from git import Git
-from typing import Union, Generator, List
-from distutils.version import StrictVersion
+from typing import Generator, List, Optional
+from version.StrictVersion import StrictVersion
 from version.change_log.IChangeLog import IChangeLog
 from version.commit_parser.models import ParsedVersion
 from version.enums.CommitTypeEnum import CommitTypeEnum
@@ -12,7 +12,7 @@ class WhatIsNew(IChangeLog):
     def __init__(self,
                  git: Git,
                  change_log_file: str,
-                 message_types: list = None
+                 message_types: Optional[List[str]] = None
                  ):
         self.last_version_regex = re.compile(
             r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)',
@@ -31,7 +31,7 @@ class WhatIsNew(IChangeLog):
             CommitTypeEnum.TEST: 'Tests',
         }
 
-    def get_last_version(self) -> Union[StrictVersion, None]:
+    def get_last_version(self) -> Optional[StrictVersion]:
         # We will get last version from changelog
         try:
             with open(self.change_log_file, 'r') as f:

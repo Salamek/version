@@ -1,5 +1,5 @@
 
-from packaging.version import Version as StrictVersion
+from version.StrictVersion import StrictVersion
 from typing import Generator
 from version.commit_parser.models import ParsedVersion
 

@@ -4,11 +4,12 @@ import re
 import glob
 import logging
 from importlib import import_module
+from typing import List
 from git import Repo, Git
 from git.remote import PushInfo
 from version.exception import ConfigurationError, ProjectVersionError
 from version.enums.CommitTypeEnum import CommitTypeEnum
-from packaging.version import Version as StrictVersion
+from version.StrictVersion import StrictVersion
 
 
 class Version:
@@ -178,7 +179,7 @@ class Version:
 
             return config
 
-    def find_changelog(self):
+    def find_changelog(self) -> None:
         if self._config.get('CHANGE_LOGS'):
             for change_log_file, change_log_generator in self._config.get('CHANGE_LOGS').items():
                 print(change_log_file)
@@ -251,7 +252,7 @@ class Version:
 
         return StrictVersion(next(iter(versions.values())))
 
-    def generate_change_log(self, version: StrictVersion, from_version: StrictVersion = None, dry: bool=False) -> list:
+    def generate_change_log(self, version: StrictVersion, from_version: StrictVersion = None, dry: bool = False) -> List[str]:
         files = []
         if self._config.get('CHANGE_LOGS'):
             commit_parser_module = self._config.get('GIT', {}).get('COMMIT_PARSER')
@@ -281,7 +282,7 @@ class Version:
 
         return files
 
-    def mark_version_files(self, version: StrictVersion, dry: bool=False) -> list:
+    def mark_version_files(self, version: StrictVersion, dry: bool = False) -> List[str]:
         """
         Mark version files with specified version
         :param version: version to set
@@ -315,17 +316,17 @@ class Version:
                                     replaces.append([m.group('version'), str(version)])
                                 except IndexError:
                                     # Lets try parted version match
-                                    replaces.append([m.group('major'), str(version.version[0])])
-                                    replaces.append([m.group('minor'), str(version.version[1])])
+                                    replaces.append([m.group('major'), str(version.major)])
+                                    replaces.append([m.group('minor'), str(version.minor)])
                                     try:
-                                        replaces.append([m.group('patch'), str(version.version[2])])
+                                        replaces.append([m.group('patch'), str(version.micro)])
                                     except IndexError:
                                         pass
 
                                     try:
-                                        if version.prerelease:
-                                            replaces.append([m.group('prerelease'), str(version.prerelease[0])])
-                                            replaces.append([m.group('prerelease_num'), str(version.prerelease[1])])
+                                        if version.is_prerelease:
+                                            replaces.append([m.group('prerelease'), str(version.pre[0])])
+                                            replaces.append([m.group('prerelease_num'), str(version.pre[1])])
                                         else:
                                             replaces.append([m.group('prerelease'), ''])
                                             replaces.append([m.group('prerelease_num'), ''])
@@ -352,54 +353,6 @@ class Version:
 
         return modified_files
 
-    @staticmethod
-    def advance_patch(version: StrictVersion, by: int=1) -> StrictVersion:
-        """
-        Advances patch version number 
-        :param version: version to modify
-        :param by: step to advance
-        :return: StrictVersion
-        """
-        new_version = StrictVersion(str(version))
-        version_modify = list(new_version.version)
-        version_modify[2] = version_modify[2] + by
-        new_version.version = tuple(version_modify)
-
-        return new_version
-
-    @staticmethod
-    def advance_minor(version: StrictVersion, by: int=1) -> StrictVersion:
-        """
-        Advances minor version number
-        :param version: version to modify
-        :param by: step to advance
-        :return: StrictVersion
-        """
-        new_version = StrictVersion(str(version))
-        version_modify = list(new_version.version)
-        version_modify[1] = version_modify[1] + by
-        version_modify[2] = 0
-        new_version.version = tuple(version_modify)
-
-        return new_version
-
-    @staticmethod
-    def advance_major(version: StrictVersion, by: int=1) -> StrictVersion:
-        """
-        Advance major version number
-        :param version: version to modify
-        :param by: step to advance
-        :return: StrictVersion
-        """
-        new_version = StrictVersion(str(version))
-        version_modify = list(new_version.version)
-        version_modify[0] = version_modify[0] + by
-        version_modify[1] = 0
-        version_modify[2] = 0
-        new_version.version = tuple(version_modify)
-
-        return new_version
-
     def build_commit_message(self, version: StrictVersion) -> str:
         """
         Build commit message
@@ -408,7 +361,7 @@ class Version:
         """
         return self._config['GIT']['COMMIT_MESSAGE'].format(version=version)
 
-    def get_uncommited_modified_files(self) -> list:
+    def get_uncommited_modified_files(self) -> List[str]:
         """
         Return uncommited modified files
         :return: list
@@ -431,9 +384,9 @@ class Version:
 
         if self._options['<version>'].startswith('+'):
             modifier = {
-                1: self.advance_patch,
-                2: self.advance_minor,
-                3: self.advance_major,
+                1: 'advance_patch',
+                2: 'advance_minor',
+                3: 'advance_major',
             }.get(self._options['<version>'].count('+'))
 
             if not modifier:
@@ -444,7 +397,7 @@ class Version:
             if found_by:
                 by = int(found_by.group(1))
 
-            set_version = modifier(current_version, by)
+            set_version = getattr(current_version, modifier)(by)
         else:
             try:
                 set_version = StrictVersion(self._options['<version>'])

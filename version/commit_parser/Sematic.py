@@ -1,9 +1,9 @@
 
 import re
 import logging
-from typing import List, Generator, Tuple
+from typing import List, Generator, Tuple, Optional
 from git import Git, exc
-from packaging.version import Version as StrictVersion
+from version.StrictVersion import StrictVersion
 from version.commit_parser.ICommitParser import ICommitParser
 from version.enums.CommitTypeEnum import CommitTypeEnum
 from version.commit_parser.models import ParsedVersion, ParsedCommitGroup, ParsedCommit, ParsedCommitType
@@ -12,14 +12,14 @@ from version.commit_parser.models import ParsedVersion, ParsedCommitGroup, Parse
 class Sematic(ICommitParser):
     log = logging.getLogger(__name__)
 
-    def __init__(self, git: Git, from_version: StrictVersion = None, to_version: StrictVersion = None):
+    def __init__(self, git: Git, from_version: Optional[StrictVersion] = None, to_version: Optional[StrictVersion] = None):
         self.git = git
 
         self.from_version = from_version
         self.to_version = to_version
         self.regex = re.compile(r'^(\S{7})\s+(feat|fix|chore|refactor|docs|style|test)(?:\((\S+?)\):|:)\s+(.+)$', re.MULTILINE)
 
-    def get_first_commit_hash(self):
+    def get_first_commit_hash(self) -> str:
         return self.git.rev_list(['--max-parents=0', 'HEAD'])
 
     def get_tags(self) -> List[StrictVersion]:
@@ -28,7 +28,7 @@ class Sematic(ICommitParser):
         tags.sort(reverse=True)
         return tags
 
-    def get_tags_in_range(self, from_version: StrictVersion = None, to_version: StrictVersion = None) -> List[StrictVersion]:
+    def get_tags_in_range(self, from_version: Optional[StrictVersion] = None, to_version: Optional[StrictVersion] = None) -> List[StrictVersion]:
         tags = self.get_tags()
 
         if from_version:
@@ -39,7 +39,7 @@ class Sematic(ICommitParser):
 
         return list(tags)
 
-    def get_tags_ranges(self, from_version: StrictVersion = None, to_version: StrictVersion = None) -> Generator[Tuple[str, str], None, None]:
+    def get_tags_ranges(self, from_version: Optional[StrictVersion] = None, to_version: Optional[StrictVersion] = None) -> Generator[Tuple[str, str], None, None]:
         tags = self.get_tags_in_range(from_version, to_version)
 
         if not tags:
