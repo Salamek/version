@@ -8,10 +8,10 @@ from git import Repo, Git
 from git.remote import PushInfo
 from version.exception import ConfigurationError, ProjectVersionError
 from version.enums.CommitTypeEnum import CommitTypeEnum
-from distutils.version import StrictVersion
+from packaging.version import Version as StrictVersion
 
 
-class Version(object):
+class Version:
     """
     Version class
     """

@@ -11,6 +11,7 @@ depends=(
     'python-yaml'
     'python-docopt'
     'python-gitpython'
+    'python-packaging'
 )
 
 prepare() {

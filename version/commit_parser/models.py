@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List
-from distutils.version import StrictVersion
+from packaging.version import Version as StrictVersion
 from version.enums.CommitTypeEnum import CommitTypeEnum
 
 

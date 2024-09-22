@@ -35,7 +35,7 @@ Options:
 import signal
 import sys
 import logging
-from distutils.version import StrictVersion
+from packaging.version import Version as StrictVersion
 from version.Version import Version
 from version.logging.ColoredFormatter import ColoredFormatter
 

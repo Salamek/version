@@ -3,7 +3,7 @@ import re
 import logging
 from typing import List, Generator, Tuple
 from git import Git, exc
-from distutils.version import StrictVersion
+from packaging.version import Version as StrictVersion
 from version.commit_parser.ICommitParser import ICommitParser
 from version.enums.CommitTypeEnum import CommitTypeEnum
 from version.commit_parser.models import ParsedVersion, ParsedCommitGroup, ParsedCommit, ParsedCommitType

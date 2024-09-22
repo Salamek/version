@@ -4,7 +4,7 @@ import datetime
 import json
 from typing import Union, Generator, List, Tuple
 from git import Git
-from distutils.version import StrictVersion
+from packaging.version import Version as StrictVersion
 from version.commit_parser.models import ParsedVersion
 from version.change_log.IChangeLog import IChangeLog
 from version.enums.CommitTypeEnum import CommitTypeEnum

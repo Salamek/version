@@ -29,6 +29,7 @@ setup(
     classifiers=classifiers,
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=[
+        'packaging',
         'docopt',
         'pyyaml',
         'gitpython'
