@@ -228,8 +228,9 @@ class Version:
                                 vstring = vstring + prerelease[0] + str(prerelease[1])
 
                         if found_path not in versions:
-                            corrected_version = str(StrictVersion(vstring))
-                            versions[found_path] = corrected_version
+                            parsed_version = StrictVersion(vstring)
+                            corrected_version = str(parsed_version)
+                            versions[found_path] = parsed_version
                             self.log.info('Found version file {} with version {}'.format(
                                 found_path,
                                 vstring if vstring == corrected_version else '{} (corrected to {})'.format(vstring, corrected_version)
