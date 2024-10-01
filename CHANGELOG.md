@@ -1,3 +1,11 @@
+None (1.5.4) unstable; urgency=medium
+
+  * Fixes
+    * 
+      * 0095e8f Pass StrictVersion object, not str
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Tue, 01 Oct 2024 18:28:07 +0000
+
 None (1.5.3) unstable; urgency=medium
 
   * Fixes
