@@ -239,14 +239,10 @@ class Version:
             raise ProjectVersionError('No version files found!')
 
         # Make sure that all found versions match
-        unique_versions = set(versions.values())
-        if len(unique_versions) > 1:
-            for unique_version in unique_versions:
-                for file_path in [k for k, v in versions.items() if v == unique_version]:
-                    self.log.error('File {} have different version than others {}'.format(
-                        file_path,
-                        unique_version)
-                    )
+        versions_values = list(versions.values())
+        if not all(x == versions_values[0] for x in versions_values):
+            for file_path, unique_version in versions.items():
+                self.log.error('File {} have different version than others {}'.format(file_path, unique_version))
 
             raise ProjectVersionError
 

@@ -37,6 +37,7 @@ import sys
 import logging
 from version.Version import Version
 from version.StrictVersion import StrictVersion
+from version.exception import ProjectVersionError, ConfigurationError
 from version.logging.ColoredFormatter import ColoredFormatter
 
 from docopt import docopt
@@ -68,33 +69,37 @@ def main() -> None:
     LOG.debug('Current configuration is: {}'.format(version.get_config()))
     LOG.debug('Current options are: {}'.format(options))
 
-    if options['<version>']:
-        if options['<version>'] == 'mark':
-            print('Please specify mark version')
-        else:
-            version.mark()
-    elif options['changelog']:
-        # Changelog CLI
-        if options['info']:
-            # Print info
-            version.find_changelog()
-        elif options['generate']:
-            # Generate changelog
+    try:
 
-            if options['<to_version>'].lower() == 'head':
-                to_version = version.find_version()
+        if options['<version>']:
+            if options['<version>'] == 'mark':
+                print('Please specify mark version')
             else:
-                to_version = StrictVersion(options['<to_version>'])
+                version.mark()
+        elif options['changelog']:
+            # Changelog CLI
+            if options['info']:
+                # Print info
+                version.find_changelog()
+            elif options['generate']:
+                # Generate changelog
 
-            if options['<from_version>'].lower() == 'changelog_head':
-                from_version = None
-            else:
-                from_version = StrictVersion(options['<from_version>'])
+                if options['<to_version>'].lower() == 'head':
+                    to_version = version.find_version()
+                else:
+                    to_version = StrictVersion(options['<to_version>'])
 
-            version.generate_change_log(to_version, from_version=from_version)
+                if options['<from_version>'].lower() == 'changelog_head':
+                    from_version = None
+                else:
+                    from_version = StrictVersion(options['<from_version>'])
 
-    elif not options['<version>'] or options['status']:
-        version.status()
+                version.generate_change_log(to_version, from_version=from_version)
+
+        elif not options['<version>'] or options['status']:
+            version.status()
+    except Exception:
+        exit(1)
 
 
 if __name__ == '__main__':
