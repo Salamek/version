@@ -1,3 +1,11 @@
+None (1.5.5) unstable; urgency=medium
+
+  * Fixes
+    * 
+      * 6bf6ac3 Return StrictVersion directly
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Tue, 01 Oct 2024 18:39:22 +0000
+
 None (1.5.4) unstable; urgency=medium
 
   * Fixes
