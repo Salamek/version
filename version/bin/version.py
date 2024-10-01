@@ -98,8 +98,10 @@ def main() -> None:
 
         elif not options['<version>'] or options['status']:
             version.status()
-    except Exception:
+    except ProjectVersionError:
         exit(1)
+    except Exception:
+        raise
 
 
 if __name__ == '__main__':

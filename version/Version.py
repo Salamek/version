@@ -247,7 +247,7 @@ class Version:
 
             raise ProjectVersionError
 
-        return StrictVersion(next(iter(versions.values())))
+        return next(iter(versions.values()))
 
     def generate_change_log(self, version: StrictVersion, from_version: StrictVersion = None, dry: bool = False) -> List[str]:
         files = []
