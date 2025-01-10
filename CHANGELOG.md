@@ -1,3 +1,9 @@
+None (1.5.6) unstable; urgency=medium
+
+  * Nothing worth mentioning
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Fri, 10 Jan 2025 18:51:33 +0000
+
 None (1.5.5) unstable; urgency=medium
 
   * Fixes
