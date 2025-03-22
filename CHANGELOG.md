@@ -1,3 +1,11 @@
+None (1.5.7) unstable; urgency=medium
+
+  * Fixes
+    * mark_version_files
+      * 19e379f Fix bug with incorrectly replaced version string
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Sat, 22 Mar 2025 22:19:01 +0000
+
 None (1.5.6) unstable; urgency=medium
 
   * Nothing worth mentioning
