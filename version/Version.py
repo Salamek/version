@@ -334,7 +334,7 @@ class Version:
                                 for needle, replacement in replaces:
                                     index = full_match.find(needle, search_after)
                                     if index > -1:
-                                        search_after = index + 1
+                                        search_after = index + len(replacement)
                                         keep_part = full_match[:index]
                                         replace_part = full_match[index:]
                                         full_match = keep_part + replace_part.replace(needle, replacement, 1)
