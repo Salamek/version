@@ -1,3 +1,9 @@
+None (1.6.1) unstable; urgency=medium
+
+  * Nothing worth mentioning
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Tue, 17 Feb 2026 19:55:36 +0000
+
 None (1.6.0) unstable; urgency=medium
 
   * Features
