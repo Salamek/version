@@ -1,3 +1,11 @@
+None (1.6.0) unstable; urgency=medium
+
+  * Features
+    * packaging.version
+      * 75a82f2 Migrate to latest version
+
+ -- Adam Schubert <adam.schubert@sg1-game.net>  Tue, 17 Feb 2026 19:30:22 +0000
+
 None (1.5.7) unstable; urgency=medium
 
   * Fixes
